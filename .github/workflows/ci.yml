@@ -1,0 +1,96 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - '**'
+  create:
+    branches:
+      - 'release/**'
+
+jobs:
+  build:
+    # Always build except on tag creation
+    if: ${{ github.ref != 'refs/tags/*' }}
+    uses: ./.github/workflows/build.yml
+
+  release-bump:
+    if: ${{ github.event_name == 'create' && startsWith(github.ref, 'refs/heads/release/') }}
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.10.2
+        with:
+          versionSpec: '5.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.10.2
+
+      - name: Update Version
+        run: |
+          make bump version=${{ steps.gitversion.outputs.semVer }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: "chore: bump version to ${{ steps.gitversion.outputs.semVer }}"
+          title: "chore: bump version to ${{ steps.gitversion.outputs.semVer }}"
+          body: |
+            Automatic version bump triggered by release branch creation.
+            Version determined by GitVersion: ${{ steps.gitversion.outputs.semVer }}
+          branch: version-bump-${{ steps.gitversion.outputs.semVer }}
+          delete-branch: true
+
+  versioning-release:
+    permissions: write-all
+    uses: switstack/switstack-reusables-workflows/.github/workflows/versioning_release.yml@main
+    secrets: inherit  
+
+  generate-doc:
+    # Release when puhing in 'main'
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    permissions: write-all
+    uses: switstack/switstack-reusables-workflows/.github/workflows/doc.yml@main
+    secrets: inherit
+
+  pull-request:
+    if: always()
+    permissions: write-all
+    uses: switstack/switstack-reusables-workflows/.github/workflows/pull-request.yml@main
+    secrets: inherit
+
+  check-status:
+    needs: [build]
+    if: always()
+    runs-on: ubuntu-22.04
+    outputs:
+      workflow_status: ${{ steps.check.outputs.workflow_status }}
+    steps:
+      - name: Check workflow status
+        id: check
+        run: |
+          status="success"
+          needs_json='${{ toJson(needs) }}'
+          if echo "$$needs_json" | jq -e '.[] | select(.result == "failure" or .result == "cancelled")' > /dev/null; then
+            status="failure"
+          fi
+          {
+            echo "workflow_status=$status"
+          } >> "$GITHUB_OUTPUT"
+
+  notify:
+    needs: [check-status]
+    if: always()
+    uses: switstack/switstack-reusables-workflows/.github/workflows/notify-slack.yml@main
+    with:
+      workflow_conclusion: ${{ needs.check-status.outputs.workflow_status }}
+      branch_name: ${{ github.ref_name }}
+    secrets: inherit
