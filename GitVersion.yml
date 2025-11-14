@@ -1,0 +1,70 @@
+mode: Mainline
+major-version-bump-message: "^(breaking|major):"
+minor-version-bump-message: "^(feature|minor):"
+minor-version-bump-message: "^(feat|minor):"
+patch-version-bump-message: "^(fix|patch):"
+no-bump-message: "^(none|skip):"
+commit-message-incrementing: Enabled
+
+branches:
+  main:
+    regex: ^main$
+    mode: ContinuousDelivery
+    tag: ''
+    increment: Patch
+    prevent-increment-of-merged-branch-version: true
+    track-merge-target: false
+    source-branches: ['develop', 'release']
+    is-source-branch-for: ['develop', 'release', 'feature', 'feat', 'hotfix']
+    is-mainline: true
+    
+  develop:
+    regex: ^develop$
+    mode: ContinuousDeployment
+    tag: beta
+    increment: Minor
+    prevent-increment-of-merged-branch-version: false
+    track-merge-target: true
+    source-branches: ['main', 'release', 'feature', 'feat', 'hotfix']
+    
+  release:
+    regex: ^release?[/-]
+    mode: ContinuousDelivery
+    tag: rc
+    increment: None
+    prevent-increment-of-merged-branch-version: true
+    track-merge-target: false
+    source-branches: ['develop', 'hotfix']
+    is-source-branch-for: ['main']
+    
+  feature:
+    regex: ^feature?[/-]
+    mode: ContinuousDelivery
+    tag: alpha.{BranchName}
+    increment: Inherit
+    prevent-increment-of-merged-branch-version: false
+    track-merge-target: false
+    source-branches: ['develop']
+
+  feat:
+    regex: ^feat?[/-]
+    mode: ContinuousDelivery
+    tag: alpha.{BranchName}
+    increment: Inherit
+    prevent-increment-of-merged-branch-version: false
+    track-merge-target: false
+    source-branches: ['develop']
+    
+  hotfix:
+    regex: ^hotfix?[/-]
+    mode: ContinuousDelivery
+    tag: beta
+    increment: Patch
+    prevent-increment-of-merged-branch-version: false
+    track-merge-target: false
+    source-branches: ['main']
+
+ignore:
+  sha: []
+
+merge-message-formats: {}
