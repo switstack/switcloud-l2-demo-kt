@@ -1,8 +1,20 @@
+# Commands
+AWK ?= awk
+GET_NEXT_VERSION ?= get-next-version
+GRADLE ?= ./gradlew
+GREP ?= grep
+MKDIR ?= mkdir
+MV ?= mv
+RM ?= rm
+SORT ?= sort
+
+PROJECT = switcloud-l2-demo
+
 default: help
 
 .PHONY: help
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; \
+	@$(GREP) -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | $(SORT) | $(AWK) 'BEGIN {FS = ":.*?## "}; \
 	{printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 ###########
@@ -12,61 +24,71 @@ help:
 .PHONY: install
 install: ## Install dependencies
 
-.PHONY: generate
-generate: ## Generate code (openapi based projects only)
-	
 #########
-# BUILD #
+# Build #
 #########
-	
-.PHONY: build
-build-artifact: ## Build package or lib
 
-.PHONY: doc-build
-build-doc: ## Build API documentation
-	
+.PHONY: clean
+clean: ## Clean build
+	$(GRADLE) -q clean
+
+# ! build-and-publish CI action
+.PHONY: build-artifacts
+build-artifact: ## Build project artifacts (AAR packages)
+	$(GRADLE) -q assemble
+
+# ! build-and-publish CI action
+.PHONY: build-doc
+build-doc: ## Build project documentation (MKDocs and KDoc)
+
 #############
 # CODESTYLE #
 #############
 
-.PHONY: code-style-fix
-code-style-fix: ## Fix code style
+.PHONY: run-code-style-fix
+run-code-style-fix: ## Fix code style
+	$(GRADLE) -q ktlintFormat
 
 .PHONY: code-style-check
-code-style-check: ## Check code style (no fix)
+run-code-style-check: ## Check code style (no fix)
+	$(GRADLE) -q ktlintCheck
+
+#################
+# CODE ANALYSIS #
+#################
+
+.PHONY: run-code-analysis-fix
+run-code-analysis-fix: ## Run code analysis
+	$(GRADLE) -q detekt --auto-correct
+
+.PHONY: run-code-analysis
+run-code-analysis: ## Run code analysis
+	$(GRADLE) -q detekt
 
 #########
 # TESTS #
 #########
 
-.PHONY: tests-coverage
-tests-coverage: ## Check test coverage
+.PHONY: run-coverage-test
+run-coverage-test: ## Check test coverage
 
-.PHONY: tests-perf
-tests-perf: ## Run performance tests
+.PHONY: tests-all
+tests-all: tests-ut tests-inte tests-func tests-smoke ## Run all tests
 
-.PHONY: tests-migration
-tests-migration: ## Run migration tests
+.PHONY: run-ut-tests
+run-ut-tests: ## Run unit tests
 
-.PHONY: tests-sql-backup
-tests-sql-backup: ## Run tests against SQL backup
+.PHONY: run-inte-tests
+run-inte-tests: ## Run integration tests
 
-.PHONY: tests-ut
-tests-ut: ## Run unit tests
+.PHONY: run-func-tests
+run-func-tests: ## Run functionnal tests
 
-.PHONY: tests-inte
-tests-inte: ## Run integration tests
+.PHONY: run-ci-tests
+run-ci-tests: ## Run CI tests
 
-.PHONY: tests-func
-tests-func: ## Run functionnal tests
-
-.PHONY: tests
-tests: ## Run all tests
-  make tests-coverage
-  make tests-perf
-  make tests-migration
-  make tests-sql-backup
-  make tests-ut && make tests-inte && make tests-func
+.PHONY: run-manual-tests
+run-all-tests: ## Run all tests
 
 ###########
 # PUBLISH #
@@ -75,20 +97,12 @@ tests: ## Run all tests
 .PHONY: publish-artifact
 publish-artifact: ## Publish main artifact
 
-.PHONY: publish-doc
-publish-doc: ## Publish API documentation
-
-##########
-# DEPLOY #
-##########
-
-.PHONY: deploy
-deploy: ## Deploy main artifact
-
 #############
 # LIFECYCLE #
 #############
 
-.PHONY: bump
-bump: ## Version bump
+.PHONY: set-version
+set-version: ## Version update
 
+.PHONY: get-version
+get-version: ## Read current version
