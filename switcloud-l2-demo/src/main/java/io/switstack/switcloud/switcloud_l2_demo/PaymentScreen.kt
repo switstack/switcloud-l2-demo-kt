@@ -1,9 +1,8 @@
-package com.example.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo
 
 import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,10 +25,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
-import com.example.switcloud_l2_demo.utils.EmvConfig
-import com.example.switcloud_l2_demo.utils.MokaConfig
-import com.example.switcloud_l2_demo.utils.Utils
+import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvConfig
+import io.switstack.switcloud.switcloud_l2_demo.utils.MokaConfig
+import io.switstack.switcloud.switcloud_l2_demo.utils.Utils
 import io.switstack.switcloud.switcloudl2.SwitcloudL2
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2Exception
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2NotFoundException

@@ -1,4 +1,4 @@
-package com.example.switcloud_l2_demo.ui.theme
+package io.switstack.switcloud.switcloud_l2_demo.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
