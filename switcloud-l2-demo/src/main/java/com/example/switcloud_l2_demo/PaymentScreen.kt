@@ -4,22 +4,24 @@ import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -96,19 +98,19 @@ suspend fun processPayment(activity: Activity, amount: String): String {
     glase.addCombination(EmvConfig.combinationVisa)
     glase.addCAKey(EmvConfig.caKey)
 
-    var result: Pair<ByteArray?, Boolean> = glase.preProcessing(trd)
-    if (!result.second)
-        return "Pre-processing failed"
+    val preProcessingResult = glase.preProcessing(trd)
+    if (!preProcessingResult.second)
+        throw SwitcloudL2Exception("Pre-processing failed")
 
     val card = glase.protocolActivation(null)
     if (card != CardInterfaceType.CARD_INTERFACE_TYPE_CONTACTLESS)
-        return "Card detection error"
+        throw SwitcloudL2Exception("Card detection error")
 
-    result = glase.combinationSelection()
-    if (!result.second)
-        return "Combination selection failed"
+    val combinationSelectionResult = glase.combinationSelection()
+    if (!combinationSelectionResult.second)
+        throw SwitcloudL2Exception("Combination selection failed")
 
-    val outcome = glase.kernelActivation(null)
+    glase.kernelActivation(null)
 
     switcloudL2.cleanupServices()
 
@@ -142,28 +144,60 @@ suspend fun processPayment(activity: Activity, amount: String): String {
 fun PaymentScreen(navController: NavController, amount: String) {
     val context = LocalContext.current
     val activity = context as Activity
-    var paymentResult by remember { mutableStateOf<String?>(null) }
 
     Switcloudl2demoktTheme {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background) // Add this line
+                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Amount: $$amount")
-            Spacer(modifier = Modifier.height(32.dp))
-            Image(
-                painter = painterResource(id = R.drawable.ic_contactless),
-                contentDescription = "EMVCo contactless logo"
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Text("Please present card")
+            Box(
+                modifier = Modifier
+                    .width(300.dp)
+                    .background(
+                        color = Color(0xFF000080), // Navy Blue
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.Filled.ShoppingCart,
+                        contentDescription = "Shopping Cart",
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "$$amount",
+                        color = Color.White,
+                        style = MaterialTheme.typography.displaySmall
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.weight(1f))
-            Button(onClick = { navController.navigate("shopping_cart") }) {
-                Text("Cancel")
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_contactless),
+                    contentDescription = "EMVCo contactless logo"
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                Text("Tap here to pay")
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Column {
+                Action(buttonText = "Cancel") {
+                    navController.navigate("shopping_cart")
+                }
+                Footer()
             }
         }
     }
@@ -172,9 +206,14 @@ fun PaymentScreen(navController: NavController, amount: String) {
         // Small delay to ensure the UI is rendered before starting payment processing
         delay(500)
 
-        paymentResult = processPayment(activity, amount)
-        paymentResult?.let { result ->
-            navController.navigate("payment_ticket/$result") {
+        try {
+            val paymentResult = processPayment(activity, amount)
+            navController.navigate("payment_ticket/true?tlvStream=$paymentResult") {
+                // Pop up to the shopping cart screen to prevent going back to payment
+                popUpTo("shopping_cart") { inclusive = false }
+            }
+        } catch (e: SwitcloudL2Exception) {
+            navController.navigate("payment_ticket/false") {
                 // Pop up to the shopping cart screen to prevent going back to payment
                 popUpTo("shopping_cart") { inclusive = false }
             }
