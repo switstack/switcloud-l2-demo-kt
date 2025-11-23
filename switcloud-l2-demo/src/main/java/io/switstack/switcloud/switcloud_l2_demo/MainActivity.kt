@@ -1,4 +1,4 @@
-package com.example.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -9,7 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
+import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

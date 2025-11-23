@@ -1,4 +1,4 @@
-package com.example.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
