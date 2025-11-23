@@ -1,5 +1,6 @@
 package com.example.switcloud_l2_demo
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,12 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
@@ -63,46 +65,60 @@ fun parseTlvString(tlvString: String): List<TlvEntry> {
 }
 
 @Composable
-fun PaymentTicketScreen(navController: NavController, paymentResult: String?) {
+fun PaymentTicketScreen(navController: NavController, success: Boolean, tlvStream: String?) {
     Switcloudl2demoktTheme {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Payment Successful!")
-            Spacer(modifier = Modifier.height(16.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                if (success) {
+                    Text("Payment Successful!")
+                    Spacer(modifier = Modifier.height(16.dp))
 
-            paymentResult?.let { tlvString ->
-                val tlvEntries = parseTlvString(tlvString)
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    tlvEntries.forEach { entry ->
-                        val tagName = EmvUtils.emvTagNames[entry.tag.uppercase()] ?: entry.tag
-                        val displayValue = if (entry.tag.uppercase() == "9C") {
-                            EmvUtils.transactionTypeToString(entry.value)
-                        } else if (EmvUtils.isTagASCII(entry.tag)) {
-                            Utils.hexStringToAsciiString(entry.value)
-                        } else {
-                            entry.value.uppercase()
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                    tlvStream?.let { tlvString ->
+                        val tlvEntries = parseTlvString(tlvString)
+                        Column(
+                            horizontalAlignment = Alignment.Start,
+                            modifier = Modifier.padding(horizontal = 16.dp)
                         ) {
-                            Text(text = tagName)
-                            Text(text = displayValue)
+                            tlvEntries.forEach { entry ->
+                                val tagName = EmvUtils.emvTagNames[entry.tag.uppercase()] ?: entry.tag
+                                val displayValue = if (entry.tag.uppercase() == "9C") {
+                                    EmvUtils.transactionTypeToString(entry.value)
+                                } else if (EmvUtils.isTagASCII(entry.tag)) {
+                                    Utils.hexStringToAsciiString(entry.value)
+                                } else {
+                                    entry.value.uppercase()
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(text = tagName)
+                                    Text(text = displayValue)
+                                }
+                            }
                         }
                     }
+                } else {
+                    Text("Payment Failed")
                 }
             }
-            Spacer(modifier = Modifier.height(32.dp))
-            Button(onClick = { navController.navigate("shopping_cart") }) {
-                Text("Back to Cart")
+            Column {
+                Action(buttonText = "Back to Cart") {
+                    navController.navigate("shopping_cart")
+                }
+                Footer()
             }
         }
     }

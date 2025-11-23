@@ -4,14 +4,12 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
-import kotlinx.coroutines.delay
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,12 +43,18 @@ fun MyApp() {
         }
 
         composable(
-            "payment_ticket/{paymentResult}",
-            arguments = listOf(navArgument("paymentResult") { type = NavType.StringType })
+            "payment_ticket/{success}?tlvStream={tlvStream}",
+            arguments = listOf(
+                navArgument("success") { type = NavType.BoolType },
+                navArgument("tlvStream") { type = NavType.StringType; nullable = true }
+            )
         ) { backStackEntry ->
+            val success = backStackEntry.arguments?.getBoolean("success") ?: false
+            val tlvStream = backStackEntry.arguments?.getString("tlvStream")
             PaymentTicketScreen(
                 navController = navController,
-                paymentResult = backStackEntry.arguments?.getString("paymentResult")
+                success = success,
+                tlvStream = tlvStream
             )
         }
     }
