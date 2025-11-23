@@ -241,7 +241,7 @@ class EmvConfig {
             0x13,
             0x99.toByte(),
             // Padding zeros
-            *ByteArray(96) { 0x00 },
+            *ByteArray(96),
             // Exponent length
             0x01,
             // Exponent
@@ -249,7 +249,7 @@ class EmvConfig {
             0x00,
             0x00,
             // Hash
-            *ByteArray(20) { 0x00 }
+            *ByteArray(20)
         )
 
         // Transaction Related Data
