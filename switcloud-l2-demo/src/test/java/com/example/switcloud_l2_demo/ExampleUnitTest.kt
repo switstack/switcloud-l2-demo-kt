@@ -1,4 +1,4 @@
-package com.example.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo
 
 import org.junit.Test
 

@@ -1,4 +1,4 @@
-package com.example.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,9 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
-import com.example.switcloud_l2_demo.utils.EmvUtils
-import com.example.switcloud_l2_demo.utils.Utils
+import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils
+import io.switstack.switcloud.switcloud_l2_demo.utils.Utils
 
 data class TlvEntry(val tag: String, val value: String)
 

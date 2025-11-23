@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.switcloud_l2_demo"
+    namespace = "io.switstack.switcloud.switcloud_l2_demo"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.switcloud_l2_demo"
+        applicationId = "io.switstack.switcloud.switcloud_l2_demo"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
