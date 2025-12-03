@@ -3,7 +3,12 @@ package io.switstack.switcloud.switcloud_l2_demo
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,6 +19,7 @@ import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             Switcloudl2demoktTheme {
                 MyApp()
@@ -25,9 +31,17 @@ class MainActivity : AppCompatActivity() {
 @Composable
 fun MyApp() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "shopping_cart") {
+    NavHost(
+        navController = navController,
+        modifier = Modifier.windowInsetsPadding(WindowInsets.safeContent),
+        startDestination = "shopping_cart"
+    ) {
         composable("shopping_cart") {
-            ShoppingCartScreen(navController = navController)
+            ShoppingCartScreen { total ->
+                navController.navigate("payment/$total") {
+                    popUpTo("shopping_cart") { inclusive = true }
+                }
+            }
         }
 
         composable(
@@ -36,9 +50,22 @@ fun MyApp() {
         ) { backStackEntry ->
             backStackEntry.arguments?.getString("amount")?.let {
                 PaymentScreen(
-                    navController = navController,
-                    amount = it
-                )
+                    amount = it,
+                    onPaymentSuccess = {
+                        navController.navigate("payment_ticket/true?tlvStream=$it") {
+                            // Pop up to the shopping cart screen to prevent going back to payment
+                            popUpTo("shopping_cart") { inclusive = false }
+                        }
+                    },
+                    onPaymentFailed = {
+                        navController.navigate("payment_ticket/false?tlvStream=$it") {
+                            // Pop up to the shopping cart screen to prevent going back to payment
+                            popUpTo("shopping_cart") { inclusive = false }
+                        }
+                    }
+                ) {
+                    navController.navigate("shopping_cart")
+                }
             }
         }
 
@@ -52,10 +79,11 @@ fun MyApp() {
             val success = backStackEntry.arguments?.getBoolean("success") ?: false
             val tlvStream = backStackEntry.arguments?.getString("tlvStream")
             PaymentTicketScreen(
-                navController = navController,
                 success = success,
                 tlvStream = tlvStream
-            )
+            ) {
+                navController.navigate("shopping_cart")
+            }
         }
     }
 }
