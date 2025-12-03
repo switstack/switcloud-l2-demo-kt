@@ -16,8 +16,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.Utils
@@ -65,61 +65,73 @@ fun parseTlvString(tlvString: String): List<TlvEntry> {
 }
 
 @Composable
-fun PaymentTicketScreen(navController: NavController, success: Boolean, tlvStream: String?) {
-    Switcloudl2demoktTheme {
+fun PaymentTicketScreen(success: Boolean, tlvStream: String?, onBackToCartClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                if (success) {
-                    Text("Payment Successful!")
-                    Spacer(modifier = Modifier.height(16.dp))
+            if (success) {
+                Text("Payment Successful!")
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    tlvStream?.let { tlvString ->
-                        val tlvEntries = parseTlvString(tlvString)
-                        Column(
-                            horizontalAlignment = Alignment.Start,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        ) {
-                            tlvEntries.forEach { entry ->
-                                val tagName = EmvUtils.emvTagNames[entry.tag.uppercase()] ?: entry.tag
-                                val displayValue = if (entry.tag.uppercase() == "9C") {
-                                    EmvUtils.transactionTypeToString(entry.value)
-                                } else if (EmvUtils.isTagASCII(entry.tag)) {
-                                    Utils.hexStringToAsciiString(entry.value)
-                                } else {
-                                    entry.value.uppercase()
-                                }
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(text = tagName)
-                                    Text(text = displayValue)
-                                }
+                tlvStream?.let { tlvString ->
+                    val tlvEntries = parseTlvString(tlvString)
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        tlvEntries.forEach { entry ->
+                            val tagName = EmvUtils.emvTagNames[entry.tag.uppercase()] ?: entry.tag
+                            val displayValue = if (entry.tag.uppercase() == "9C") {
+                                EmvUtils.transactionTypeToString(entry.value)
+                            } else if (EmvUtils.isTagASCII(entry.tag)) {
+                                Utils.hexStringToAsciiString(entry.value)
+                            } else {
+                                entry.value.uppercase()
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(text = tagName)
+                                Text(text = displayValue)
                             }
                         }
                     }
-                } else {
-                    Text("Payment Failed")
                 }
-            }
-            Column {
-                Action(buttonText = "Back to Cart") {
-                    navController.navigate("shopping_cart")
-                }
-                Footer()
+            } else {
+                Text("Payment Failed")
             }
         }
+        Column {
+            Action(buttonText = "Back to Cart", onClick = onBackToCartClick)
+            Footer()
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PaymentTicketScreenSuccessPreview() {
+    Switcloudl2demoktTheme {
+        PaymentTicketScreen(true, null) { }
+    }
+}
+
+@Preview
+@Composable
+fun PaymentTicketScreenErrorPreview() {
+    Switcloudl2demoktTheme {
+        PaymentTicketScreen(false, null) { }
     }
 }
