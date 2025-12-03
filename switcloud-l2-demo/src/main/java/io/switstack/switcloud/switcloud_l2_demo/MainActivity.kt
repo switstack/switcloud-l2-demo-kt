@@ -51,14 +51,14 @@ fun MyApp() {
             backStackEntry.arguments?.getString("amount")?.let {
                 PaymentScreen(
                     amount = it,
-                    onPaymentSuccess = {
-                        navController.navigate("payment_ticket/true?tlvStream=$it") {
+                    onPaymentSuccess = { tlvStream ->
+                        navController.navigate("payment_ticket/true?tlvStream=$tlvStream") {
                             // Pop up to the shopping cart screen to prevent going back to payment
                             popUpTo("shopping_cart") { inclusive = false }
                         }
                     },
                     onPaymentFailed = {
-                        navController.navigate("payment_ticket/false?tlvStream=$it") {
+                        navController.navigate("payment_ticket/false") {
                             // Pop up to the shopping cart screen to prevent going back to payment
                             popUpTo("shopping_cart") { inclusive = false }
                         }
