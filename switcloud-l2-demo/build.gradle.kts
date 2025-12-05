@@ -86,6 +86,13 @@ dependencies {
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.9.6")
 
+    /* TLV parser / builder */
+    implementation("com.payneteasy:ber-tlv:1.0-11")
+
+    /* Serialization */
+    implementation("com.squareup.moshi:moshi:1.15.2")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
+
     testImplementation("junit:junit:4.13.2")
 
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
@@ -93,6 +100,7 @@ dependencies {
 
     /* Local AAR */
     implementation(files("libs/switcloud-l2-mokastd-release.aar"))
+    implementation(files("libs/switcloud-api-kt-release.aar"))
 }
 
 /* Detekt --------------------------------------------------------------------------------------- */
