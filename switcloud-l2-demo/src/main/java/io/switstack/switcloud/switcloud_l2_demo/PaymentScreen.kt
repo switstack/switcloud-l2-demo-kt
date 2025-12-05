@@ -1,5 +1,6 @@
 package io.switstack.switcloud.switcloud_l2_demo
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -19,29 +21,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
+import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.findActivity
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2Exception
 import kotlinx.coroutines.delay
 
 @Composable
-fun PaymentScreen(
-    paymentViewModel: PaymentViewModel = viewModel(),
-    amount: String,
-    onPaymentSuccess: (String) -> Unit,
-    onPaymentFailed: () -> Unit,
-    onCancelClick: () -> Unit
+fun PaymentScreen(paymentViewModel: PaymentViewModel = viewModel(),
+                  amount: String,
+                  onPaymentSuccess: (String) -> Unit,
+                  onPaymentFailed: () -> Unit,
+                  onCancelClick: () -> Unit
 ) {
     val context = LocalContext.current
-
-    //val currentOnTimeout by rememberUpdatedState(onTimeout)
-    //val paymentUiState = paymentViewModel.uiState.collectAsState()
 
     PaymentScreenContent(amount, onCancelClick)
 
@@ -75,7 +75,7 @@ fun PaymentScreenContent(amount: String, onCancelClick: () -> Unit) {
             modifier = Modifier
                 .width(300.dp)
                 .background(
-                    color = Color(0xFF000080), // Navy Blue
+                    color = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(16.dp)
                 )
                 .padding(16.dp),
@@ -83,14 +83,15 @@ fun PaymentScreenContent(amount: String, onCancelClick: () -> Unit) {
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
+                    modifier = Modifier.size(60.dp),
                     imageVector = Icons.Filled.ShoppingCart,
                     contentDescription = "Shopping Cart",
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "$$amount",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     style = MaterialTheme.typography.displaySmall
                 )
             }
@@ -103,23 +104,31 @@ fun PaymentScreenContent(amount: String, onCancelClick: () -> Unit) {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_contactless),
-                contentDescription = "EMVCo contactless logo"
+                contentDescription = "EMVCo contactless logo",
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
+                modifier = Modifier.width(150.dp)
             )
-            Spacer(modifier = Modifier.height(32.dp))
-            Text("Tap here to pay")
+            Text(text = "Tap here to pay",
+                 color = MaterialTheme.colorScheme.onBackground,
+                 style = MaterialTheme.typography.titleLarge)
         }
 
         Spacer(modifier = Modifier.weight(1f))
 
         Column {
-            Action(buttonText = "Cancel", onClick = onCancelClick)
+            Action(buttonText = "Cancel",
+                   buttonType = ButtonType.Tonal,
+                   onClick = onCancelClick)
             Footer()
         }
     }
 }
 
-@Preview
+@Preview(device = TABLET)
+@Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PaymentScreenPreview() {
-    PaymentScreenContent("1000") { }
+    Switcloudl2demoktTheme {
+        PaymentScreenContent("1000") { }
+    }
 }

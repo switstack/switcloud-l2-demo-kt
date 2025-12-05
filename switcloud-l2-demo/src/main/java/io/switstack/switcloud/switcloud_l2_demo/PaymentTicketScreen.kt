@@ -1,6 +1,6 @@
 package io.switstack.switcloud.switcloud_l2_demo
 
-import androidx.compose.foundation.background
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,86 +12,64 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
+import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.Utils
 
-data class TlvEntry(val tag: String, val value: String)
+@Composable
+fun PaymentTicketScreen(paymentViewModel: PaymentViewModel = viewModel(),
+                        success: Boolean,
+                        tlvStream: String?,
+                        onBackToCartClick: () -> Unit
+) {
+    val tlvEntries = paymentViewModel.parseTlvString(tlvStream)
 
-fun parseTlvString(tlvString: String): List<TlvEntry> {
-    val tlvBytes = Utils.hexStringToByteArray(tlvString)
-    val tlvEntries = mutableListOf<TlvEntry>()
-    var offset = 0
-
-    while (offset < tlvBytes.size) {
-        // Parse Tag
-        var tagBytes = 1
-        var tag = tlvBytes[offset].toInt() and 0xFF
-        if ((tag and 0x1F) == 0x1F) { // Multi-byte tag
-            tagBytes++
-            while ((tlvBytes[offset + tagBytes - 1].toInt() and 0x80) == 0x80) {
-                tagBytes++
-            }
-        }
-        val tagHex = Utils.byteArrayToHexString(tlvBytes.copyOfRange(offset, offset + tagBytes))
-        offset += tagBytes
-
-        // Parse Length
-        var lengthBytes = 1
-        var length = tlvBytes[offset].toInt() and 0xFF
-        if ((length and 0x80) == 0x80) { // Multi-byte length
-            val numLengthBytes = length and 0x7F
-            length = 0
-            for (i in 0 until numLengthBytes) {
-                length = (length shl 8) or (tlvBytes[offset + 1 + i].toInt() and 0xFF)
-            }
-            lengthBytes += numLengthBytes
-        }
-        offset += lengthBytes
-
-        // Parse Value
-        val valueBytes = tlvBytes.copyOfRange(offset, offset + length)
-        val valueHex = Utils.byteArrayToHexString(valueBytes)
-        tlvEntries.add(TlvEntry(tagHex, valueHex))
-        offset += length
-    }
-    return tlvEntries
+    PaymentTicketScreenContent(tlvEntries,
+                               success,
+                               onBackToCartClick)
 }
 
 @Composable
-fun PaymentTicketScreen(success: Boolean, tlvStream: String?, onBackToCartClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
+                               success: Boolean,
+                               onBackToCartClick: () -> Unit
+) {
+    Surface(color = MaterialTheme.colorScheme.background) {
         Column(
             modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (success) {
-                Text("Payment Successful!")
-                Spacer(modifier = Modifier.height(16.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                if (success) {
+                    Text("Payment Successful!")
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                tlvStream?.let { tlvString ->
-                    val tlvEntries = parseTlvString(tlvString)
                     Column(
                         horizontalAlignment = Alignment.Start,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     ) {
                         tlvEntries.forEach { entry ->
-                            val tagName = EmvUtils.emvTagNames[entry.tag.uppercase()] ?: entry.tag
+                            val tagName =
+                                EmvUtils.emvTagNames[entry.tag.uppercase()] ?: entry.tag
                             val displayValue = if (entry.tag.uppercase() == "9C") {
                                 EmvUtils.transactionTypeToString(entry.value)
                             } else if (EmvUtils.isTagASCII(entry.tag)) {
@@ -108,30 +86,34 @@ fun PaymentTicketScreen(success: Boolean, tlvStream: String?, onBackToCartClick:
                             }
                         }
                     }
+                } else {
+                    Text("Payment Failed")
                 }
-            } else {
-                Text("Payment Failed")
             }
-        }
-        Column {
-            Action(buttonText = "Back to Cart", onClick = onBackToCartClick)
-            Footer()
+            Column {
+                Action(buttonText = "Back to Cart",
+                       buttonType = ButtonType.Filled,
+                       onClick = onBackToCartClick)
+                Footer()
+            }
         }
     }
 }
 
-@Preview
+@Preview(device = TABLET)
+@Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PaymentTicketScreenSuccessPreview() {
     Switcloudl2demoktTheme {
-        PaymentTicketScreen(true, null) { }
+        PaymentTicketScreenContent(emptyList(), true) { }
     }
 }
 
-@Preview
+@Preview(device = TABLET)
+@Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PaymentTicketScreenErrorPreview() {
     Switcloudl2demoktTheme {
-        PaymentTicketScreen(false, null) { }
+        PaymentTicketScreenContent(emptyList(), false) { }
     }
 }
