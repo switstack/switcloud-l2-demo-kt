@@ -24,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,29 +31,46 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
+import kotlinx.coroutines.delay
 
 @Composable
 fun PaymentScreen(paymentViewModel: PaymentViewModel,
                   amount: String,
-                  onPaymentSuccess: (String) -> Unit,
-                  onPaymentFailed: () -> Unit,
+                  onPaymentVerdict: (Boolean, String?) -> Unit,
+                  onBackToCartClick: () -> Unit,
                   onCancelClick: () -> Unit
 ) {
-    val context = LocalContext.current
-
     val uiState by paymentViewModel.uiState.collectAsStateWithLifecycle()
 
-    PaymentScreenContent(amount, uiState.initialized, onCancelClick)
+    PaymentScreenContent(amount,
+                         uiState.initialized,
+                         uiState.success,
+                         uiState.errorMessage,
+                         onBackToCartClick,
+                         onCancelClick)
 
     LaunchedEffect(uiState.initialized) {
         if (uiState.initialized) {
             paymentViewModel.processPayment(amount)
         }
     }
+
+    LaunchedEffect(uiState.tlvString) {
+        delay(1000)
+        uiState.tlvString?.let { tlvStream ->
+            onPaymentVerdict(uiState.success, tlvStream)
+        }
+    }
 }
 
 @Composable
-fun PaymentScreenContent(amount: String, ready: Boolean, onCancelClick: () -> Unit) {
+fun PaymentScreenContent(amount: String,
+                         ready: Boolean,
+                         success: Boolean,
+                         errorMessage: String?,
+                         onBackToCartClick: () -> Unit,
+                         onCancelClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -94,6 +110,25 @@ fun PaymentScreenContent(amount: String, ready: Boolean, onCancelClick: () -> Un
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             when {
+                errorMessage != null -> {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_crossmark),
+                        contentDescription = "Error crossmark",
+                        modifier = Modifier.width(100.dp)
+                    )
+                    Text(text = errorMessage,
+                         color = MaterialTheme.colorScheme.onBackground,
+                         style = MaterialTheme.typography.bodyLarge)
+                }
+
+                success -> {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_checkmark),
+                        contentDescription = "Success checkmark",
+                        modifier = Modifier.width(100.dp)
+                    )
+                }
+
                 !ready -> {
                     CircularProgressIndicator(modifier = Modifier.size(75.dp))
                     Text(modifier = Modifier.padding(top = 32.dp),
@@ -119,20 +154,61 @@ fun PaymentScreenContent(amount: String, ready: Boolean, onCancelClick: () -> Un
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Column {
-            Action(buttonText = "Cancel",
-                   buttonType = ButtonType.Tonal,
-                   onClick = onCancelClick)
-            Footer()
+        errorMessage?.let {
+            Action(buttonText = "Back to cart",
+                   buttonType = ButtonType.Filled,
+                   onClick = onBackToCartClick)
+        } ?: run {
+            if (ready && !success) {
+                Action(buttonText = "Cancel",
+                       buttonType = ButtonType.Tonal,
+                       onClick = onCancelClick)
+            }
         }
+        Footer()
     }
 }
 
 @Preview(device = TABLET)
 @Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun PaymentScreenPreview() {
+fun PaymentScreenLoadingPreview() {
     Switcloudl2demoktTheme {
-        PaymentScreenContent("1000", false) { }
+        PaymentScreenContent("1000",
+                             false,
+                             false,
+                             null,
+                             { },
+                             { })
     }
 }
+
+@Preview(device = TABLET)
+@Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PaymentScreenReadyPreview() {
+    Switcloudl2demoktTheme {
+        PaymentScreenContent("1000", true, false, null, { }, { })
+    }
+}
+
+
+@Preview(device = TABLET)
+@Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PaymentScreenSuccessPreview() {
+    Switcloudl2demoktTheme {
+        PaymentScreenContent("1000", true, true, null, { }, { })
+    }
+}
+
+
+@Preview(device = TABLET)
+@Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PaymentScreenErrorPreview() {
+    Switcloudl2demoktTheme {
+        PaymentScreenContent("1000", true, false, "Error", { }, { })
+    }
+}
+

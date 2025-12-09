@@ -6,6 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.switstack.switcloud.switcloud_l2_demo.data.CapkMultiScheme
 import io.switstack.switcloud.switcloud_l2_demo.data.EmvMultiScheme
+import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.AID
+import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.Amount
+import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.Application_label
+import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.CID
+import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.DF_Name
+import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.Data
+import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.OPS
+import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.PAN
+import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.TT
+import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.TVR
 import io.switstack.switcloud.switcloud_l2_demo.utils.ByteArrayHexStringUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvConfig
 import io.switstack.switcloud.switcloud_l2_demo.utils.MokaConfig
@@ -29,7 +39,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class PaymentViewModel(activity: Activity) : ViewModel() {
+class PaymentViewModel(private val activity: Activity) : ViewModel() {
 
     private lateinit var switcloudL2: SwitcloudL2
     private lateinit var glase: IGlase
@@ -49,9 +59,6 @@ class PaymentViewModel(activity: Activity) : ViewModel() {
                 // Initialize dependent services
                 glase = switcloudL2.glase()
                 reader = switcloudL2.reader()
-
-                // Perform the rest of the configuration
-                configureGlaseAndReader(activity)
 
                 // Update the UI state to signal that initialization is complete.
                 _uiState.update { it.copy(initialized = true) }
@@ -140,7 +147,6 @@ class PaymentViewModel(activity: Activity) : ViewModel() {
 
 
     fun processPayment(amount: String) {
-        println("### Call to processPayment()")
         // Guard clause to prevent processing before initialization is complete.
         if (!uiState.value.initialized) {
             _uiState.update { it.copy(errorMessage = "SwitCloudL2 is not ready.") }
@@ -148,6 +154,9 @@ class PaymentViewModel(activity: Activity) : ViewModel() {
         }
 
         viewModelScope.launch(IO) {
+            // Perform the rest of the configuration
+            configureGlaseAndReader(activity)
+
             // Construct the 'trd' byte array in TLV format
             val trd = createTrd(amount)
 
@@ -174,29 +183,57 @@ class PaymentViewModel(activity: Activity) : ViewModel() {
 
                 // Items to show on ticket
                 val ticketTags = listOf(
-                    "9C",    // TT
-                    "9A",    // Data
-                    "9F02",  // Amount
-                    "4F",    // AID
-                    "84",    // DF Name
-                    "50",    // Application label
-                    "5A",    // PAN
-                    "9F27",  // CID
-                    "95",    // TVR
-                    "DF8129" // OPS
+                    TT,
+                    Data,
+                    Amount,
+                    AID,
+                    DF_Name,
+                    Application_label,
+                    PAN,
+                    CID,
+                    TVR,
+                    OPS
                 )
 
                 var ticketData: ByteArray = byteArrayOf()
+                var success = false
+                var pinEntryRequired = false
                 for (tag in ticketTags) {
                     try {
-                        glase.getTag(ByteArrayHexStringUtils.hexStringToByteArray(tag))?.let { ticketData += it }
+                        glase.getTag(ByteArrayHexStringUtils.hexStringToByteArray(tag.hexTag))?.let {
+                            ticketData += it
+
+                            if (tag == OPS) {
+                                val hexTlvString = ByteArrayHexStringUtils.byteArrayToHexString(it)
+                                val OPSTlvEntry = TlvUtils.parseTlvString(hexTlvString).single()
+                                val OPSValueByteArray = ByteArrayHexStringUtils.hexStringToByteArray(OPSTlvEntry.value)
+
+                                // check if CVM is required
+                                if (OPSValueByteArray.size >= 4 && OPSValueByteArray[3] == 0x20.toByte()) {
+                                    // Show PIN entry
+                                    pinEntryRequired = true
+                                } else {
+                                    // PIN entry not required
+                                    if (OPSValueByteArray.isNotEmpty()
+                                        && OPSValueByteArray[0] == 0x10.toByte() // Approved
+                                        || OPSValueByteArray[0] == 0x30.toByte() // Online request
+                                    ) {
+                                        success = true
+                                    }
+                                }
+                            }
+                        }
                     } catch (e: SwitcloudL2NotFoundException) {
                         // Skip that tag
+                        println("Tag not found in ticket : ${tag.name}")
                     }
                 }
 
+                val tlvString = ByteArrayHexStringUtils.byteArrayToHexString(ticketData)
+
                 _uiState.update {
-                    it.copy(tlvString = ByteArrayHexStringUtils.byteArrayToHexString(ticketData))
+                    if (pinEntryRequired) it.copy(showPinEntry = true, tlvString = tlvString)
+                    else it.copy(success = success, tlvString = tlvString, errorMessage = "Failure".takeUnless { success })
                 }
             } catch (e: SwitcloudL2Exception) {
                 _uiState.update {
@@ -213,8 +250,20 @@ class PaymentViewModel(activity: Activity) : ViewModel() {
             _uiState.update { it.copy(errorMessage = "SwitCloudL2 is not ready.") }
             return
         }
-
+        resetPaymentState()
         // TODO find switcloudL2 method to cancel payment
+    }
+
+    fun resetPaymentState() {
+        switcloudL2.cleanupServices()
+        _uiState.update {
+            it.copy(
+                showPinEntry = false,
+                tlvString = null,
+                success = false,
+                errorMessage = null
+            )
+        }
     }
 
     // Helper function to convert an integer to a BCD byte array of a specific length
@@ -253,7 +302,20 @@ class PaymentViewModel(activity: Activity) : ViewModel() {
             add(0x02.toByte()) // Tag 9F02 (second byte)
             add(0x06.toByte()) // Length 06
             addAll(amountBcd.toList())
+
+            // 4. Currency Code (tag: 5f2a, length: 02, value: Euro code)
+            add(0x5F.toByte()) // Tag 5F2A (first byte)
+            add(0x2A.toByte()) // Tag 5F2A (second byte)
+            add(0x02.toByte()) // Length 02
+            add(0x09.toByte()) // Value Euro code (first byte)
+            add(0x78.toByte()) // Value Euro code (second byte)
+
+            // 5. Transaction Currency Exponent (tag: 5f36, length: 01, value: 2)
+            add(0x5F.toByte()) // Tag 5F36 (first byte)
+            add(0x36.toByte()) // Tag 5F36 (second byte)
+            add(0x01.toByte()) // Length 01
+            add(0x02.toByte()) // Value exponent
+
         }.toByteArray()
     }
-
 }

@@ -69,19 +69,19 @@ fun MyApp() {
 
                 PaymentScreen(paymentViewModel = paymentViewModel,
                               amount = amount,
-                              onPaymentSuccess = { tlvStream ->
-                                  navController.navigate("payment_ticket/true?tlvStream=$tlvStream") {
+                              onPaymentVerdict = { success, tlvStream ->
+                                  paymentViewModel.resetPaymentState()
+                                  navController.navigate("payment_ticket/$success?tlvStream=$tlvStream") {
                                       // Pop up to the shopping cart screen to prevent going back to payment
                                       popUpTo("shopping_cart") { inclusive = false }
                                   }
                               },
-                              onPaymentFailed = {
-                                  navController.navigate("payment_ticket/false") {
-                                      // Pop up to the shopping cart screen to prevent going back to payment
-                                      popUpTo("shopping_cart") { inclusive = false }
-                                  }
+                              onBackToCartClick = {
+                                  paymentViewModel.resetPaymentState()
+                                  navController.navigate("shopping_cart")
                               },
                               onCancelClick = {
+                                  paymentViewModel.cancelPayment()
                                   navController.navigate("shopping_cart")
                               }
                 )
