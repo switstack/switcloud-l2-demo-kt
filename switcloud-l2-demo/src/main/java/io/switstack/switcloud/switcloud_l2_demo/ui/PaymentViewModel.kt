@@ -6,19 +6,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.switstack.switcloud.switcloud_l2_demo.data.CapkMultiScheme
 import io.switstack.switcloud.switcloud_l2_demo.data.EmvMultiScheme
-import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.AID
-import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.Amount
-import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.Application_label
-import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.CID
-import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.DF_Name
-import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.Data
-import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.OPS
-import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.PAN
-import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.TT
-import io.switstack.switcloud.switcloud_l2_demo.data.TicketTags.TVR
+import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum
+import io.switstack.switcloud.switcloud_l2_demo.data.OPSVerdictEnum
 import io.switstack.switcloud.switcloud_l2_demo.utils.ByteArrayHexStringUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvConfig
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getOPSVerdict
 import io.switstack.switcloud.switcloud_l2_demo.utils.MokaConfig
+import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.readJsonFromAssets
 import io.switstack.switcloud.switcloudapi.model.CAPKCreateSchema
@@ -153,6 +147,8 @@ class PaymentViewModel(private val activity: Activity) : ViewModel() {
             return
         }
 
+        SharedPrefUtils(activity).incrementAndPutTransactionCounter()
+
         viewModelScope.launch(IO) {
             // Perform the rest of the configuration
             configureGlaseAndReader(activity)
@@ -183,16 +179,17 @@ class PaymentViewModel(private val activity: Activity) : ViewModel() {
 
                 // Items to show on ticket
                 val ticketTags = listOf(
-                    TT,
-                    Data,
-                    Amount,
-                    AID,
-                    DF_Name,
-                    Application_label,
-                    PAN,
-                    CID,
-                    TVR,
-                    OPS
+                    EmvTagEnum.TAG_9C,      //TT
+                    EmvTagEnum.TAG_9A,      //Data
+                    EmvTagEnum.TAG_9F02,    //Amount
+                    EmvTagEnum.TAG_DF8129,   //OPS
+                    //EmvTagEnum.TAG_4F,      //AID
+                    EmvTagEnum.TAG_5F20,      //Cardholder Name
+                    EmvTagEnum.TAG_84,      //DF_Name
+                    EmvTagEnum.TAG_50,      //Application_label
+                    EmvTagEnum.TAG_5A,      //PAN
+                    EmvTagEnum.TAG_9F27,    //CID
+                    EmvTagEnum.TAG_95      //TVR
                 )
 
                 var ticketData: ByteArray = byteArrayOf()
@@ -200,26 +197,16 @@ class PaymentViewModel(private val activity: Activity) : ViewModel() {
                 var pinEntryRequired = false
                 for (tag in ticketTags) {
                     try {
-                        glase.getTag(ByteArrayHexStringUtils.hexStringToByteArray(tag.hexTag))?.let {
-                            ticketData += it
+                        glase.getTag(ByteArrayHexStringUtils.hexStringToByteArray(tag.hexTag))?.let { value ->
+                            ticketData += value
 
-                            if (tag == OPS) {
-                                val hexTlvString = ByteArrayHexStringUtils.byteArrayToHexString(it)
-                                val OPSTlvEntry = TlvUtils.parseTlvString(hexTlvString).single()
-                                val OPSValueByteArray = ByteArrayHexStringUtils.hexStringToByteArray(OPSTlvEntry.value)
-
-                                // check if CVM is required
-                                if (OPSValueByteArray.size >= 4 && OPSValueByteArray[3] == 0x20.toByte()) {
-                                    // Show PIN entry
-                                    pinEntryRequired = true
-                                } else {
-                                    // PIN entry not required
-                                    if (OPSValueByteArray.isNotEmpty()
-                                        && OPSValueByteArray[0] == 0x10.toByte() // Approved
-                                        || OPSValueByteArray[0] == 0x30.toByte() // Online request
-                                    ) {
-                                        success = true
-                                    }
+                            if (tag == EmvTagEnum.TAG_DF8129) {
+                                val opsHexString = ByteArrayHexStringUtils.byteArrayToHexString(value)
+                                val OPSTlvEntry = TlvUtils.parseTlvString(opsHexString).single()
+                                when (getOPSVerdict(OPSTlvEntry.value)) {
+                                    OPSVerdictEnum.SUCCESS -> success = true
+                                    OPSVerdictEnum.PIN_REQUIRED -> pinEntryRequired = true
+                                    OPSVerdictEnum.FAILURE -> success = false
                                 }
                             }
                         }

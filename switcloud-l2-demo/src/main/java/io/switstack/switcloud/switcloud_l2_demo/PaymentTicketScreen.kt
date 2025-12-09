@@ -17,30 +17,36 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
-import io.switstack.switcloud.switcloud_l2_demo.utils.ByteArrayHexStringUtils
-import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getTagLabel
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getValueLabel
+import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
+import kotlin.random.Random
 
 @Composable
 fun PaymentTicketScreen(success: Boolean,
                         tlvStream: String?,
                         onBackToCartClick: () -> Unit
 ) {
-    val tlvEntries = TlvUtils.parseTlvString(tlvStream)
+    val tlvEntries = TlvUtils.parseTlvString(tlvStream?.uppercase())
+    val transactionCounter = SharedPrefUtils(LocalContext.current).getTransactionCounter()
 
     PaymentTicketScreenContent(tlvEntries,
                                success,
+                               transactionCounter,
                                onBackToCartClick)
 }
 
 @Composable
 fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                                success: Boolean,
+                               transactionCounter: Int,
                                onBackToCartClick: () -> Unit
 ) {
     Surface(color = MaterialTheme.colorScheme.background) {
@@ -67,22 +73,13 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                     horizontalAlignment = Alignment.Start,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    tlvEntries.forEach { entry ->
-                        val tagName =
-                            EmvUtils.emvTagNames[entry.tag.uppercase()] ?: entry.tag
-                        val displayValue = if (entry.tag.uppercase() == "9C") {
-                            EmvUtils.transactionTypeToString(entry.value)
-                        } else if (EmvUtils.isTagASCII(entry.tag)) {
-                            ByteArrayHexStringUtils.hexStringToAsciiString(entry.value)
-                        } else {
-                            entry.value.uppercase()
-                        }
+                    tlvEntriesToMap(tlvEntries, transactionCounter).forEach { entry ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(text = tagName)
-                            Text(text = displayValue)
+                            Text(text = entry.key)
+                            Text(text = entry.value)
                         }
                     }
                 }
@@ -96,6 +93,15 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
         }
     }
 }
+
+private fun tlvEntriesToMap(tlvEntries: List<TlvEntry>, transactionCounter: Int): Map<String, String> =
+    tlvEntries.map { entry ->
+        getTagLabel(entry.tag) to getValueLabel(entry.tag, entry.value)
+    }.toMutableList().apply {
+        add(4, "Entry Method" to "Contactless")
+        add("Approval number" to Random.nextInt(999999999).toString().padStart(10, '0'))
+        add("Transaction #" to transactionCounter.toString().padStart(6, '0'))
+    }.toMap()
 
 private val sampleTlv = listOf(
     TlvEntry("9C", "0000000"),
@@ -115,7 +121,7 @@ private val sampleTlv = listOf(
 @Composable
 fun PaymentTicketScreenSuccessPreview() {
     Switcloudl2demoktTheme {
-        PaymentTicketScreenContent(sampleTlv, true) { }
+        PaymentTicketScreenContent(sampleTlv, true, 123) { }
     }
 }
 
@@ -124,6 +130,6 @@ fun PaymentTicketScreenSuccessPreview() {
 @Composable
 fun PaymentTicketScreenErrorPreview() {
     Switcloudl2demoktTheme {
-        PaymentTicketScreenContent(sampleTlv, false) { }
+        PaymentTicketScreenContent(sampleTlv, false, 0) { }
     }
 }

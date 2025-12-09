@@ -55,7 +55,7 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
         }
     }
 
-    LaunchedEffect(uiState.tlvString) {
+    LaunchedEffect(uiState.tlvString) { //replace with success
         delay(1000)
         uiState.tlvString?.let { tlvStream ->
             onPaymentVerdict(uiState.success, tlvStream)
