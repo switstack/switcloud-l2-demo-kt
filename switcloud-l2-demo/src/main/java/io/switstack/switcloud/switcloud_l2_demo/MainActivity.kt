@@ -2,6 +2,7 @@ package io.switstack.switcloud.switcloud_l2_demo
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeContent
@@ -11,31 +12,38 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModelFactory
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.findActivity
 
 class MainActivity : AppCompatActivity() {
+
+    val paymentViewModel: PaymentViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        paymentViewModel.initializeSwitcloudL2(this)
         setContent {
             Switcloudl2demoktTheme {
-                MyApp()
+                MyApp(paymentViewModel)
             }
         }
+    }
+
+    override fun onDestroy() {
+        paymentViewModel.cleanupSwitcloudL2()
+        super.onDestroy()
     }
 }
 
 @Composable
-fun MyApp() {
+fun MyApp(paymentViewModel: PaymentViewModel) {
     val navController = rememberNavController()
     LocalContext.current.findActivity()?.let { activity ->
         NavHost(
@@ -59,11 +67,6 @@ fun MyApp() {
                 val parentEntry = remember(backStackEntry) {
                     navController.getBackStackEntry("payment_flow")
                 }
-
-                val paymentViewModel: PaymentViewModel = viewModel(
-                    viewModelStoreOwner = parentEntry,
-                    factory = PaymentViewModelFactory(activity)
-                )
 
                 val amount = backStackEntry.arguments?.getString("amount") ?: "0"
 

@@ -123,8 +123,7 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
             Column {
                 Action(buttonText = "Back to Cart",
                        buttonType = ButtonType.Filled,
-                       onClick = onBackToCartClick
-                )
+                       onClick = onBackToCartClick)
                 Footer()
             }
         }
@@ -156,11 +155,9 @@ private val sampleTlv = listOf(
 @Preview(device = PIXEL_7)
 @Preview(device = TABLET)
 @Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(
-    device = TABLET,
-    widthDp = 800,
-    heightDp = 1280
-)
+@Preview(device = TABLET,
+         widthDp = 800,
+         heightDp = 1280)
 @Composable
 fun PaymentTicketScreenSuccessPreview() {
     Switcloudl2demoktTheme {
