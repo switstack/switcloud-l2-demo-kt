@@ -33,40 +33,44 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class PaymentViewModel(private val activity: Activity) : ViewModel() {
+class PaymentViewModel() : ViewModel() {
 
-    private lateinit var switcloudL2: SwitcloudL2
+    private val switcloudL2: SwitcloudL2 = SwitcloudL2.getInstance()
     private lateinit var glase: IGlase
     private lateinit var reader: IReader
     private val _uiState = MutableStateFlow(PaymentUiState())
     val uiState: StateFlow<PaymentUiState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch(IO) {
-            try {
-                // All SwitcloudL2 initialization happens here, off the main thread.
-                switcloudL2 = SwitcloudL2.getInstance().apply {
-                    setActivity(activity)
-                    initializeServices()
-                }
+        try {
+            // Initialize dependent services
+            glase = switcloudL2.glase()
+            reader = switcloudL2.reader()
 
-                // Initialize dependent services
-                glase = switcloudL2.glase()
-                reader = switcloudL2.reader()
-
-                // Update the UI state to signal that initialization is complete.
-                _uiState.update { it.copy(initialized = true) }
-                println("SwitcloudL2 initialized")
-
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        initialized = false,
-                        errorMessage = "Initialization failed: ${e.message}"
-                    )
-                }
+        } catch (e: Exception) {
+            _uiState.update {
+                it.copy(
+                    initialized = false,
+                    errorMessage = "Initialization failed: ${e.message}"
+                )
             }
         }
+    }
+
+    fun initializeSwitcloudL2(activity: Activity) {
+        viewModelScope.launch(IO) {
+            // All SwitcloudL2 initialization happens here, off the main thread.
+            switcloudL2.setActivity(activity)
+            switcloudL2.initializeServices()
+
+            // Update the UI state to signal that initialization is complete.
+            _uiState.update { it.copy(initialized = true) }
+            println("SwitcloudL2 initialized")
+        }
+    }
+
+    fun cleanupSwitcloudL2() {
+        switcloudL2.cleanupServices()
     }
 
     fun configureGlaseAndReader(context: Context) {
@@ -147,11 +151,13 @@ class PaymentViewModel(private val activity: Activity) : ViewModel() {
             return
         }
 
-        SharedPrefUtils(activity).incrementAndPutTransactionCounter()
+        val currentActivity = switcloudL2.getActivity()
+
+        SharedPrefUtils(currentActivity!!).incrementAndPutTransactionCounter()
 
         viewModelScope.launch(IO) {
             // Perform the rest of the configuration
-            configureGlaseAndReader(activity)
+            configureGlaseAndReader(currentActivity)
 
             // Construct the 'trd' byte array in TLV format
             val trd = createTrd(amount)
@@ -219,8 +225,10 @@ class PaymentViewModel(private val activity: Activity) : ViewModel() {
                 val tlvString = ByteArrayHexStringUtils.byteArrayToHexString(ticketData)
 
                 _uiState.update {
-                    if (pinEntryRequired) it.copy(showPinEntry = true, tlvString = tlvString)
-                    else it.copy(success = success, tlvString = tlvString, errorMessage = "Failure".takeUnless { success })
+                    if (pinEntryRequired)
+                        it.copy(showPinEntry = true, tlvString = tlvString)
+                    else
+                        it.copy(success = success, tlvString = tlvString, errorMessage = "Failure".takeUnless { success })
                 }
             } catch (e: SwitcloudL2Exception) {
                 _uiState.update {
@@ -242,7 +250,7 @@ class PaymentViewModel(private val activity: Activity) : ViewModel() {
     }
 
     fun resetPaymentState() {
-        switcloudL2.cleanupServices()
+        cleanupSwitcloudL2()
         _uiState.update {
             it.copy(
                 showPinEntry = false,
