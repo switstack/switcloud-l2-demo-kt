@@ -20,20 +20,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils
-import io.switstack.switcloud.switcloud_l2_demo.utils.Utils
+import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
+import io.switstack.switcloud.switcloud_l2_demo.utils.ByteArrayHexStringUtils
 
 @Composable
-fun PaymentTicketScreen(paymentViewModel: PaymentViewModel = viewModel(),
-                        success: Boolean,
+fun PaymentTicketScreen(success: Boolean,
                         tlvStream: String?,
                         onBackToCartClick: () -> Unit
 ) {
-    val tlvEntries = paymentViewModel.parseTlvString(tlvStream)
+    val tlvEntries = TlvUtils.parseTlvString(tlvStream)
 
     PaymentTicketScreenContent(tlvEntries,
                                success,
@@ -73,7 +71,7 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                             val displayValue = if (entry.tag.uppercase() == "9C") {
                                 EmvUtils.transactionTypeToString(entry.value)
                             } else if (EmvUtils.isTagASCII(entry.tag)) {
-                                Utils.hexStringToAsciiString(entry.value)
+                                ByteArrayHexStringUtils.hexStringToAsciiString(entry.value)
                             } else {
                                 entry.value.uppercase()
                             }

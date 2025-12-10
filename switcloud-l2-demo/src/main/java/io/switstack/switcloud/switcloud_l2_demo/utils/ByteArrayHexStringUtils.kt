@@ -1,8 +1,6 @@
 package io.switstack.switcloud.switcloud_l2_demo.utils
 
-import java.nio.charset.CharacterCodingException
-
-class Utils {
+class ByteArrayHexStringUtils {
 
     companion object {
 

@@ -1,123 +1,220 @@
 package io.switstack.switcloud.switcloud_l2_demo.ui
 
 import android.app.Activity
+import android.content.Context
 import androidx.lifecycle.ViewModel
-import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
+import androidx.lifecycle.viewModelScope
+import io.switstack.switcloud.switcloud_l2_demo.data.CapkMultiScheme
+import io.switstack.switcloud.switcloud_l2_demo.data.EmvMultiScheme
+import io.switstack.switcloud.switcloud_l2_demo.utils.ByteArrayHexStringUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvConfig
 import io.switstack.switcloud.switcloud_l2_demo.utils.MokaConfig
-import io.switstack.switcloud.switcloud_l2_demo.utils.Utils
+import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
+import io.switstack.switcloud.switcloud_l2_demo.utils.readJsonFromAssets
+import io.switstack.switcloud.switcloudapi.model.CAPKCreateSchema
+import io.switstack.switcloud.switcloudapi.model.EMVCreateSchema
+import io.switstack.switcloud.switcloudl2.IGlase
+import io.switstack.switcloud.switcloudl2.IReader
 import io.switstack.switcloud.switcloudl2.SwitcloudL2
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2Exception
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2NotFoundException
 import io.switstack.switcloud.switcloudl2.helpers.CardInterfaceType
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class PaymentViewModel() : ViewModel() {
+class PaymentViewModel(activity: Activity) : ViewModel() {
 
-    fun processPayment(activity: Activity, amount: String): String {
+    private lateinit var switcloudL2: SwitcloudL2
+    private lateinit var glase: IGlase
+    private lateinit var reader: IReader
+    private val _uiState = MutableStateFlow(PaymentUiState())
+    val uiState: StateFlow<PaymentUiState> = _uiState.asStateFlow()
 
-        // Construct the 'trd' byte array in TLV format
-        val trd = createTrd(amount)
-
-        // Pseudocode for the logic (replace with your actual classes and methods)
-        val switcloudL2 = SwitcloudL2.getInstance()
-        switcloudL2.setActivity(activity)
-        switcloudL2.initializeServices()
-
-        val glase = switcloudL2.glase()
-        val reader = switcloudL2.reader()
-
-        reader.configure(MokaConfig.readerParams)
-
-        glase.configureEntryPoint(EmvConfig.entryPointConfiguration)
-        glase.addCombination(EmvConfig.combinationMastercard)
-        glase.addCombination(EmvConfig.combinationVisa)
-        glase.addCAKey(EmvConfig.caKey)
-
-        val preProcessingResult = glase.preProcessing(trd)
-        if (!preProcessingResult.second)
-            throw SwitcloudL2Exception("Pre-processing failed")
-
-        val card = glase.protocolActivation(null)
-        if (card != CardInterfaceType.CARD_INTERFACE_TYPE_CONTACTLESS)
-            throw SwitcloudL2Exception("Card detection error")
-
-        val combinationSelectionResult = glase.combinationSelection()
-        if (!combinationSelectionResult.second)
-            throw SwitcloudL2Exception("Combination selection failed")
-
-        glase.kernelActivation(null)
-
-        switcloudL2.cleanupServices()
-
-        // Items to show on ticket
-        val ticketTags = listOf(
-            "9C",    // TT
-            "9A",    // Data
-            "9F02",  // Amount
-            "4F",    // AID
-            "84",    // DF Name
-            "50",    // Application label
-            "5A",    // PAN
-            "9F27",  // CID
-            "95",    // TVR
-            "DF8129" // OPS
-        )
-
-        var ticketData: ByteArray = byteArrayOf()
-        for (tag in ticketTags) {
+    init {
+        viewModelScope.launch(IO) {
             try {
-                glase.getTag(Utils.hexStringToByteArray(tag))?.let { ticketData += it }
-            } catch (e: SwitcloudL2NotFoundException) {
-                // Skip that tag
+                // All SwitcloudL2 initialization happens here, off the main thread.
+                switcloudL2 = SwitcloudL2.getInstance().apply {
+                    setActivity(activity)
+                    initializeServices()
+                }
+
+                // Initialize dependent services
+                glase = switcloudL2.glase()
+                reader = switcloudL2.reader()
+
+                // Perform the rest of the configuration
+                configureGlaseAndReader(activity)
+
+                // Update the UI state to signal that initialization is complete.
+                _uiState.update { it.copy(initialized = true) }
+                println("SwitcloudL2 initialized")
+
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        initialized = false,
+                        errorMessage = "Initialization failed: ${e.message}"
+                    )
+                }
             }
         }
-
-        return Utils.byteArrayToHexString(ticketData)
     }
 
-    fun parseTlvString(tlvString: String?): List<TlvEntry> {
-        if(tlvString == null) return emptyList()
+    fun configureGlaseAndReader(context: Context) {
+        reader.configure(MokaConfig.readerParams)
 
-        val tlvBytes = Utils.hexStringToByteArray(tlvString)
-        val tlvEntries = mutableListOf<TlvEntry>()
-        var offset = 0
+        // TODO move entry point config in to a file if needed
+        glase.configureEntryPoint(EmvConfig.entryPointConfiguration)
 
-        while (offset < tlvBytes.size) {
-            // Parse Tag
-            var tagBytes = 1
-            var tag = tlvBytes[offset].toInt() and 0xFF
-            if ((tag and 0x1F) == 0x1F) { // Multi-byte tag
-                tagBytes++
-                while ((tlvBytes[offset + tagBytes - 1].toInt() and 0x80) == 0x80) {
-                    tagBytes++
-                }
+        loadEMVCreateSchema(context)?.let {
+            for (emv in it) {
+                val combination = TlvUtils.makeGlaseCombination(emv)
+                //println("Adding combination ${emv.aid} ${emv.kernel} ${emv.tlv}")
+                glase.addCombination(combination)
             }
-            val tagHex = Utils.byteArrayToHexString(tlvBytes.copyOfRange(offset, offset + tagBytes))
-            offset += tagBytes
-
-            // Parse Length
-            var lengthBytes = 1
-            var length = tlvBytes[offset].toInt() and 0xFF
-            if ((length and 0x80) == 0x80) { // Multi-byte length
-                val numLengthBytes = length and 0x7F
-                length = 0
-                for (i in 0 until numLengthBytes) {
-                    length = (length shl 8) or (tlvBytes[offset + 1 + i].toInt() and 0xFF)
-                }
-                lengthBytes += numLengthBytes
-            }
-            offset += lengthBytes
-
-            // Parse Value
-            val valueBytes = tlvBytes.copyOfRange(offset, offset + length)
-            val valueHex = Utils.byteArrayToHexString(valueBytes)
-            tlvEntries.add(TlvEntry(tagHex, valueHex))
-            offset += length
         }
-        return tlvEntries
+
+        loadCapkCreateSchema(context)?.let {
+            for (capk in it) {
+                val cakey = TlvUtils.makeGlaseCAKey(capk)
+                //println("Adding CAKey ${capk.rid} ${capk.index}")
+                glase.addCAKey(cakey)
+            }
+        }
+
+//        Hardcoded loading
+//        glase.addCombination(EmvConfig.combinationMastercard)
+//        glase.addCombination(EmvConfig.combinationVisa)
+//        glase.addCAKey(EmvConfig.caKey)
+    }
+
+    fun loadEMVCreateSchema(context: Context): List<EMVCreateSchema>? {
+        try {
+            val jsonString = context.readJsonFromAssets("emv-config/conf-multiScheme.json")
+
+            val emvMultiSchemeData = TlvUtils.parseJsonToScheme(jsonString, EmvMultiScheme::class.java)
+
+            // You can now use the parsed data
+            if (emvMultiSchemeData != null) {
+                println("Successfully parsed emv config: ${emvMultiSchemeData.emvs.size} emvs found!")
+            }
+
+            return emvMultiSchemeData?.emvs?.values?.toList()
+
+        } catch (e: Exception) {
+            _uiState.update {
+                it.copy(errorMessage = "Failed to load EMV Config")
+            }
+            return null
+        }
+    }
+
+    fun loadCapkCreateSchema(context: Context): List<CAPKCreateSchema>? {
+        try {
+            val jsonString = context.readJsonFromAssets("emv-config/multiSchemeKeys.json")
+
+            val capkMultiSchemeData = TlvUtils.parseJsonToScheme(jsonString, CapkMultiScheme::class.java)
+
+            // You can now use the parsed data
+            if (capkMultiSchemeData != null) {
+                println("Successfully parsed capk: ${capkMultiSchemeData.capks.size} capks found!")
+            }
+
+            return capkMultiSchemeData?.capks?.values?.toList()
+
+        } catch (e: Exception) {
+            _uiState.update {
+                it.copy(errorMessage = "Failed to load CAPK list")
+            }
+            return null
+        }
+    }
+
+
+    fun processPayment(amount: String) {
+        println("### Call to processPayment()")
+        // Guard clause to prevent processing before initialization is complete.
+        if (!uiState.value.initialized) {
+            _uiState.update { it.copy(errorMessage = "SwitCloudL2 is not ready.") }
+            return
+        }
+
+        viewModelScope.launch(IO) {
+            // Construct the 'trd' byte array in TLV format
+            val trd = createTrd(amount)
+
+            try {
+                val preProcessingResult = glase.preProcessing(trd)
+                if (!preProcessingResult.second)
+                    _uiState.update {
+                        it.copy(errorMessage = "Pre-processing failed")
+                    }
+
+                val card = glase.protocolActivation(null)
+                if (card != CardInterfaceType.CARD_INTERFACE_TYPE_CONTACTLESS)
+                    _uiState.update {
+                        it.copy(errorMessage = "Card detection error")
+                    }
+
+                val combinationSelectionResult = glase.combinationSelection()
+                if (!combinationSelectionResult.second)
+                    _uiState.update {
+                        it.copy(errorMessage = "Combination selection failed")
+                    }
+
+                glase.kernelActivation(null)
+
+                // Items to show on ticket
+                val ticketTags = listOf(
+                    "9C",    // TT
+                    "9A",    // Data
+                    "9F02",  // Amount
+                    "4F",    // AID
+                    "84",    // DF Name
+                    "50",    // Application label
+                    "5A",    // PAN
+                    "9F27",  // CID
+                    "95",    // TVR
+                    "DF8129" // OPS
+                )
+
+                var ticketData: ByteArray = byteArrayOf()
+                for (tag in ticketTags) {
+                    try {
+                        glase.getTag(ByteArrayHexStringUtils.hexStringToByteArray(tag))?.let { ticketData += it }
+                    } catch (e: SwitcloudL2NotFoundException) {
+                        // Skip that tag
+                    }
+                }
+
+                _uiState.update {
+                    it.copy(tlvString = ByteArrayHexStringUtils.byteArrayToHexString(ticketData))
+                }
+            } catch (e: SwitcloudL2Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = e.message)
+                }
+            }
+            // TODO check if switcloudL2 needs a clearing method on read error or success
+        }
+    }
+
+    fun cancelPayment() {
+        // Guard clause to prevent processing before initialization is complete.
+        if (!uiState.value.initialized) {
+            _uiState.update { it.copy(errorMessage = "SwitCloudL2 is not ready.") }
+            return
+        }
+
+        // TODO find switcloudL2 method to cancel payment
     }
 
     // Helper function to convert an integer to a BCD byte array of a specific length
@@ -142,7 +239,7 @@ class PaymentViewModel() : ViewModel() {
             val calendar = Calendar.getInstance()
             val dateFormat = SimpleDateFormat("yyMMdd", Locale.US)
             val dateString = dateFormat.format(calendar.time)
-            val dateBcd = Utils.hexStringToByteArray(dateString)
+            val dateBcd = ByteArrayHexStringUtils.hexStringToByteArray(dateString)
 
             add(0x9A.toByte()) // Tag 9A
             add(0x03.toByte()) // Length 03

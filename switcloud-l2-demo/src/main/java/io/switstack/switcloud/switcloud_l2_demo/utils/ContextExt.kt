@@ -19,3 +19,7 @@ fun Context.findActivity(): Activity? {
     // This can happen in previews, for example.
     return null
 }
+
+fun Context.readJsonFromAssets(fileName: String): String {
+    return this.assets.open(fileName).bufferedReader().use { it.readText() }
+}
