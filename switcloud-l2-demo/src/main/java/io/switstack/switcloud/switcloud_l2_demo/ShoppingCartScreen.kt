@@ -24,10 +24,10 @@ import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 
 @Composable
 fun ShoppingCartScreen(
-    onProceedPaymentClick: (total: Double) -> Unit
+    onProceedPaymentClick: (total: String) -> Unit
 ) {
     val items = (1..5).map { it to it * 10.0 }
-    val total = items.sumOf { it.second }
+    val total = String.format("%.2f", items.sumOf { it.second })
 
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(
