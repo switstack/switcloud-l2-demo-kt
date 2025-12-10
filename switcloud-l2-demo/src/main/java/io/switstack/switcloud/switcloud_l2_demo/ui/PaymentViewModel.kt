@@ -183,7 +183,7 @@ class PaymentViewModel(private val activity: Activity) : ViewModel() {
                     EmvTagEnum.TAG_9A,      //Data
                     EmvTagEnum.TAG_9F02,    //Amount
                     EmvTagEnum.TAG_DF8129,   //OPS
-                    //EmvTagEnum.TAG_4F,      //AID
+                    EmvTagEnum.TAG_4F,      //AID
                     EmvTagEnum.TAG_5F20,      //Cardholder Name
                     EmvTagEnum.TAG_84,      //DF_Name
                     EmvTagEnum.TAG_50,      //Application_label

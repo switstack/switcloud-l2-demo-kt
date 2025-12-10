@@ -55,7 +55,7 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
         }
     }
 
-    LaunchedEffect(uiState.tlvString) { //replace with success
+    LaunchedEffect(uiState.tlvString) { //replace with success whn pin screen will be implemented
         delay(1000)
         uiState.tlvString?.let { tlvStream ->
             onPaymentVerdict(uiState.success, tlvStream)
@@ -185,6 +185,9 @@ fun PaymentScreenLoadingPreview() {
 
 @Preview(device = TABLET)
 @Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(device = TABLET,
+         widthDp = 800,
+         heightDp = 1280)
 @Composable
 fun PaymentScreenReadyPreview() {
     Switcloudl2demoktTheme {
