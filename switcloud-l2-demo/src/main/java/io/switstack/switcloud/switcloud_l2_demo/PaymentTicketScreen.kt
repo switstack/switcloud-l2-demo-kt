@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -43,7 +44,7 @@ import kotlin.random.Random
 @Composable
 fun PaymentTicketScreen(success: Boolean,
                         tlvStream: String?,
-                        onBackToCartClick: () -> Unit
+                        onBackToPreviousClick: () -> Unit
 ) {
     val tlvEntries = TlvUtils.parseTlvString(tlvStream?.uppercase())
     val transactionCounter = SharedPrefUtils(LocalContext.current).getTransactionCounter()
@@ -51,14 +52,14 @@ fun PaymentTicketScreen(success: Boolean,
     PaymentTicketScreenContent(tlvEntries,
                                success,
                                transactionCounter,
-                               onBackToCartClick)
+                               onBackToPreviousClick)
 }
 
 @Composable
 fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                                success: Boolean,
                                transactionCounter: Int,
-                               onBackToCartClick: () -> Unit
+                               onBackToPreviousClick: () -> Unit
 ) {
     val ticketTextStyle = TextStyle(
         fontSize = if (isCompactDevice()) 12.sp else 18.sp,
@@ -121,9 +122,10 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                 }
             }
             Column {
-                Action(buttonText = "Back to Cart",
+                Action(modifier = Modifier.align(Alignment.CenterHorizontally),
+                       buttonText = stringResource(R.string.back_to_previous),
                        buttonType = ButtonType.Filled,
-                       onClick = onBackToCartClick)
+                       onClick = onBackToPreviousClick)
                 Footer()
             }
         }

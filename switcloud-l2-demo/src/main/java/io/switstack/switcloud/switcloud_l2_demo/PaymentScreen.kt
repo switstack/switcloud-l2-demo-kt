@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -24,7 +25,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,22 +39,28 @@ import kotlinx.coroutines.delay
 @Composable
 fun PaymentScreen(paymentViewModel: PaymentViewModel,
                   amount: String,
+                  isShoppingCart: Boolean = false,
                   onPaymentVerdict: (Boolean, String?) -> Unit,
-                  onBackToCartClick: () -> Unit,
+                  onBackToPreviousClick: () -> Unit,
                   onCancelClick: () -> Unit
 ) {
     val uiState by paymentViewModel.uiState.collectAsStateWithLifecycle()
 
-    PaymentScreenContent(amount,
+    val iconPayment = if (isShoppingCart) Icons.Filled.ShoppingCart else Icons.Filled.Payment
+
+    val amountFormatted = String.format("%.2f", amount.filter(Char::isDigit).toDouble())
+
+    PaymentScreenContent(amountFormatted,
+                         iconPayment,
                          uiState.initialized,
                          uiState.success,
                          uiState.errorMessage,
-                         onBackToCartClick,
+                         onBackToPreviousClick,
                          onCancelClick)
 
     LaunchedEffect(uiState.initialized) {
         if (uiState.initialized) {
-            paymentViewModel.processPayment(amount)
+            paymentViewModel.processPayment(amountFormatted)
         }
     }
 
@@ -65,10 +74,11 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 
 @Composable
 fun PaymentScreenContent(amount: String,
+                         iconPayment: ImageVector,
                          ready: Boolean,
                          success: Boolean,
                          errorMessage: String?,
-                         onBackToCartClick: () -> Unit,
+                         onBackToPreviousClick: () -> Unit,
                          onCancelClick: () -> Unit
 ) {
     Column(
@@ -91,7 +101,7 @@ fun PaymentScreenContent(amount: String,
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     modifier = Modifier.size(60.dp),
-                    imageVector = Icons.Filled.ShoppingCart,
+                    imageVector = iconPayment,
                     contentDescription = "Shopping Cart",
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
@@ -155,9 +165,9 @@ fun PaymentScreenContent(amount: String,
         Spacer(modifier = Modifier.weight(1f))
 
         errorMessage?.let {
-            Action(buttonText = "Back to cart",
+            Action(buttonText = stringResource(R.string.back_to_previous),
                    buttonType = ButtonType.Filled,
-                   onClick = onBackToCartClick)
+                   onClick = onBackToPreviousClick)
         } ?: run {
             if (ready && !success) {
                 Action(buttonText = "Cancel",
@@ -175,6 +185,7 @@ fun PaymentScreenContent(amount: String,
 fun PaymentScreenLoadingPreview() {
     Switcloudl2demoktTheme {
         PaymentScreenContent("1000",
+                             Icons.Filled.Payment,
                              false,
                              false,
                              null,
@@ -191,7 +202,13 @@ fun PaymentScreenLoadingPreview() {
 @Composable
 fun PaymentScreenReadyPreview() {
     Switcloudl2demoktTheme {
-        PaymentScreenContent("1000", true, false, null, { }, { })
+        PaymentScreenContent("1000",
+                             Icons.Filled.Payment,
+                             true,
+                             false,
+                             null,
+                             { },
+                             { })
     }
 }
 
@@ -201,7 +218,13 @@ fun PaymentScreenReadyPreview() {
 @Composable
 fun PaymentScreenSuccessPreview() {
     Switcloudl2demoktTheme {
-        PaymentScreenContent("1000", true, true, null, { }, { })
+        PaymentScreenContent("1000",
+                             Icons.Filled.Payment,
+                             true,
+                             true,
+                             null,
+                             { },
+                             { })
     }
 }
 
@@ -211,7 +234,13 @@ fun PaymentScreenSuccessPreview() {
 @Composable
 fun PaymentScreenErrorPreview() {
     Switcloudl2demoktTheme {
-        PaymentScreenContent("1000", true, false, "Error", { }, { })
+        PaymentScreenContent("1000",
+                             Icons.Filled.Payment,
+                             true,
+                             false,
+                             "Error",
+                             { },
+                             { })
     }
 }
 

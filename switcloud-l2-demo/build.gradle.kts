@@ -37,16 +37,25 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     androidResources {
         noCompress.add("mbn")
     }
 
+    flavorDimensions += "version"
     flavorDimensions += "l2"
 
     productFlavors {
-
+        create("qcom") {
+            dimension = "version"
+            applicationIdSuffix = ".qcom"
+            versionNameSuffix = "-qcom"
+        }
+        create("standalone") {
+            dimension = "version"
+        }
         create("mokastd") {
             dimension = "l2"
         }
@@ -99,7 +108,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 
     /* Local AAR */
-    implementation(files("libs/switcloud-l2-mokastd-release.aar"))
+    implementation(files("libs/switcloud-l2-mokastd-debug.aar"))
     implementation(files("libs/switcloud-api-kt-release.aar"))
 }
 
