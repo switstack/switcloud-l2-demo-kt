@@ -63,6 +63,13 @@ class PaymentViewModel() : ViewModel() {
             switcloudL2.setActivity(activity)
             switcloudL2.initializeServices()
 
+            loadCapkCreateSchema(activity)?.let {
+                for (capk in it) {
+                    val cakey = TlvUtils.makeGlaseCAKey(capk)
+                    glase.addCAKey(cakey)
+                }
+            }
+
             // Update the UI state to signal that initialization is complete.
             _uiState.update { it.copy(initialized = true) }
             println("SwitcloudL2 initialized")
@@ -82,16 +89,7 @@ class PaymentViewModel() : ViewModel() {
         loadEMVCreateSchema(context)?.let {
             for (emv in it) {
                 val combination = TlvUtils.makeGlaseCombination(emv)
-                //println("Adding combination ${emv.aid} ${emv.kernel} ${emv.tlv}")
                 glase.addCombination(combination)
-            }
-        }
-
-        loadCapkCreateSchema(context)?.let {
-            for (capk in it) {
-                val cakey = TlvUtils.makeGlaseCAKey(capk)
-                //println("Adding CAKey ${capk.rid} ${capk.index}")
-                glase.addCAKey(cakey)
             }
         }
 
@@ -234,8 +232,9 @@ class PaymentViewModel() : ViewModel() {
                 _uiState.update {
                     it.copy(errorMessage = e.message)
                 }
+            } finally {
+                cleanupSwitcloudL2()
             }
-            // TODO check if switcloudL2 needs a clearing method on read error or success
         }
     }
 
@@ -250,7 +249,6 @@ class PaymentViewModel() : ViewModel() {
     }
 
     fun resetPaymentState() {
-        cleanupSwitcloudL2()
         _uiState.update {
             it.copy(
                 showPinEntry = false,
