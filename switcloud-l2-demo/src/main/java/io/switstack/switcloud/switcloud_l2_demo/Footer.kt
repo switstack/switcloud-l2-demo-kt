@@ -21,9 +21,14 @@ import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorEnum
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorEnum.STANDALONE
+import java.util.Locale.getDefault
 
 @Composable
 fun Footer(modifier: Modifier = Modifier) {
+    val standaloneVersion = FlavorEnum.valueOf(BuildConfig.FLAVOR_version.uppercase(getDefault())) == STANDALONE
+
     BoxWithConstraints() {
         val narrowWidth = maxWidth < 400.dp
         Row(
@@ -33,26 +38,29 @@ fun Footer(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(if (narrowWidth) 20.dp else 80.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_dragonwing),
-                contentDescription = "Dragonwing Logo",
-                modifier = Modifier.weight(1f),
-                contentScale = ContentScale.Crop,
-                colorFilter = if (isSystemInDarkTheme())
-                // using contrasted color with background
-                    ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
-                else
-                // using default color of dragonwing logo
-                    ColorFilter.tint(Color(0xFF31017D))
-            )
-            Box(modifier = Modifier.weight(0.4f),
-                contentAlignment = Alignment.Center)
-            {
+            if(!standaloneVersion) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_oona),
-                    contentDescription = "Oona Logo",
-                    contentScale = ContentScale.Fit
+                    painter = painterResource(id = R.drawable.ic_dragonwing),
+                    contentDescription = "Dragonwing Logo",
+                    modifier = Modifier.weight(1f),
+                    contentScale = ContentScale.Crop,
+                    colorFilter = if (isSystemInDarkTheme())
+                    // using contrasted color with background
+                        ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
+                    else
+                    // using default color of dragonwing logo
+                        ColorFilter.tint(Color(0xFF31017D))
                 )
+                Box(
+                    modifier = Modifier.weight(0.4f),
+                    contentAlignment = Alignment.Center)
+                {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_oona),
+                        contentDescription = "Oona Logo",
+                        contentScale = ContentScale.Fit
+                    )
+                }
             }
             Image(
                 painter = painterResource(id = if (isSystemInDarkTheme())
