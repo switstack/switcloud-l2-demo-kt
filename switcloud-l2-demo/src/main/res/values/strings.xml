@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">switcloud-l2-demo</string>
     <string name="pay">Pay</string>
+    <string name="preference_file_key">io.switstack.switcloud.switcloud_l2_demo.PREFERENCE_FILE_KEY</string>
+    <string name="transaction_counter_key">io.switstack.switcloud.switcloud_l2_demo.transaction_counter_key</string>
 </resources>
