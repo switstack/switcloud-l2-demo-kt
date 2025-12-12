@@ -29,7 +29,7 @@ fun Footer(modifier: Modifier = Modifier) {
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .height(100.dp),
+                .height(110.dp),
             horizontalArrangement = Arrangement.spacedBy(if (narrowWidth) 20.dp else 80.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -37,7 +37,7 @@ fun Footer(modifier: Modifier = Modifier) {
                 painter = painterResource(id = R.drawable.ic_dragonwing),
                 contentDescription = "Dragonwing Logo",
                 modifier = Modifier.weight(1f),
-                contentScale = ContentScale.FillWidth,
+                contentScale = ContentScale.Crop,
                 colorFilter = if (isSystemInDarkTheme())
                 // using contrasted color with background
                     ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
