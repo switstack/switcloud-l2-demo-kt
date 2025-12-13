@@ -249,6 +249,7 @@ class PaymentViewModel() : ViewModel() {
     }
 
     fun resetPaymentState() {
+        cleanupSwitcloudL2()
         _uiState.update {
             it.copy(
                 showPinEntry = false,
