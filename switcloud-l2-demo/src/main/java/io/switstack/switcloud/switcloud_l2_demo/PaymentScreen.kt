@@ -159,7 +159,6 @@ fun PaymentScreenContent(amount: String,
                          style = MaterialTheme.typography.titleLarge)
                 }
             }
-
         }
 
         Spacer(modifier = Modifier.weight(1f))

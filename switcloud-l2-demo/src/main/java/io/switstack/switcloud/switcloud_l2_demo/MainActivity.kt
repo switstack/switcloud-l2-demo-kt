@@ -96,7 +96,6 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
                           },
                           onCancelClick = {
                               paymentViewModel.cancelPayment()
-                              navController.navigate(startDestination)
                           }
             )
         }
