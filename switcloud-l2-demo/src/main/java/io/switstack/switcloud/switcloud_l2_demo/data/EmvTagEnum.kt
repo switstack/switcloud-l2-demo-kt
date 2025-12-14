@@ -33,7 +33,7 @@ enum class EmvTagEnum(val tagName: String) {
     TAG_9F1E("Interface Device (IFD) Serial Number"),
     TAG_9F21("Transaction Time"),
     TAG_9F26("Application Cryptogram"),
-    TAG_9F27("Cryptogram Information Data"),
+    TAG_9F27("CID"),
     TAG_9F33("Terminal Capabilities"),
     TAG_9F34("Cardholder Verification Method (CVM) Results"),
     TAG_9F35("Terminal Type"),
