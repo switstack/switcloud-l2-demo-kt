@@ -70,12 +70,12 @@ fun PaymentEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                         Row(modifier = Modifier
                             .align(Alignment.CenterHorizontally),
                             horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                            RoundAction(buttonText = "$5",
+                            RoundAction(buttonText = "$5.00",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text ->
                                             onProceedPaymentClick(text)
                                         })
-                            RoundAction(buttonText = "$25",
+                            RoundAction(buttonText = "$25.00",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text ->
                                             onProceedPaymentClick(text)
@@ -84,12 +84,12 @@ fun PaymentEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                         Row(modifier = Modifier
                             .align(Alignment.CenterHorizontally),
                             horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                            RoundAction(buttonText = "$50",
+                            RoundAction(buttonText = "$50.00",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text ->
                                             onProceedPaymentClick(text)
                                         })
-                            RoundAction(buttonText = "$100",
+                            RoundAction(buttonText = "$100.00",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text ->
                                             onProceedPaymentClick(text)
@@ -113,7 +113,7 @@ fun PaymentEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                             inputTransformation = DigitOnlyInputTransformation(),
                             onKeyboardAction = {
                                 customAmount.text.takeIf { it.isNotBlank() }?.let {
-                                    onProceedPaymentClick(it.toString())
+                                    onProceedPaymentClick("$it.00")
                                 }
                             }
                         )
