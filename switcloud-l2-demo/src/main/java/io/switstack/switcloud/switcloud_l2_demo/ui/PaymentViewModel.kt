@@ -21,7 +21,9 @@ import io.switstack.switcloud.switcloudl2.IGlase
 import io.switstack.switcloud.switcloudl2.IReader
 import io.switstack.switcloud.switcloudl2.SwitcloudL2
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2Exception
+import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2InterruptedException
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2NotFoundException
+import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2TimeoutException
 import io.switstack.switcloud.switcloudl2.helpers.CardInterfaceType
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -153,6 +155,9 @@ class PaymentViewModel() : ViewModel() {
 
         SharedPrefUtils(currentActivity!!).incrementAndPutTransactionCounter()
 
+        // Reset cancellation flag
+        switcloudL2.setPollingCancelled(false)
+
         viewModelScope.launch(IO) {
             // Perform the rest of the configuration
             configureGlaseAndReader(currentActivity)
@@ -228,6 +233,15 @@ class PaymentViewModel() : ViewModel() {
                     else
                         it.copy(success = success, tlvString = tlvString, errorMessage = "Failure".takeUnless { success })
                 }
+
+            } catch (e: SwitcloudL2TimeoutException) {
+                _uiState.update {
+                    it.copy(errorMessage = "Card detection timeout")
+                }
+            } catch (e: SwitcloudL2InterruptedException) {
+                _uiState.update {
+                    it.copy(errorMessage = "User cancelled")
+                }
             } catch (e: SwitcloudL2Exception) {
                 _uiState.update {
                     it.copy(errorMessage = e.message)
@@ -244,8 +258,8 @@ class PaymentViewModel() : ViewModel() {
             _uiState.update { it.copy(errorMessage = "SwitCloudL2 is not ready.") }
             return
         }
-        resetPaymentState()
-        // TODO find switcloudL2 method to cancel payment
+
+        switcloudL2.setPollingCancelled(true)
     }
 
     fun resetPaymentState() {

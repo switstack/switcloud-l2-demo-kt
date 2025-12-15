@@ -56,7 +56,7 @@ fun PaymentEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                 Text(modifier = Modifier
                     .fillMaxWidth()
                     .padding(32.dp),
-                     text = "How much do you want to pay for the demo?",
+                     text = "Please enter amount",
                      textAlign = TextAlign.Center,
                      style = MaterialTheme.typography.titleLarge)
                 Box(modifier = Modifier
@@ -70,12 +70,12 @@ fun PaymentEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                         Row(modifier = Modifier
                             .align(Alignment.CenterHorizontally),
                             horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                            RoundAction(buttonText = "$1",
+                            RoundAction(buttonText = "$5",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text ->
                                             onProceedPaymentClick(text)
                                         })
-                            RoundAction(buttonText = "$10",
+                            RoundAction(buttonText = "$25",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text ->
                                             onProceedPaymentClick(text)
@@ -84,12 +84,12 @@ fun PaymentEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                         Row(modifier = Modifier
                             .align(Alignment.CenterHorizontally),
                             horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                            RoundAction(buttonText = "$100",
+                            RoundAction(buttonText = "$50",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text ->
                                             onProceedPaymentClick(text)
                                         })
-                            RoundAction(buttonText = "$1000",
+                            RoundAction(buttonText = "$100",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text ->
                                             onProceedPaymentClick(text)
