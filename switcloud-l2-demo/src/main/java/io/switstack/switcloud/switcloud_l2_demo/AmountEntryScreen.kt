@@ -47,6 +47,7 @@ fun PaymentEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(modifier = Modifier
             .fillMaxSize()
+            .padding(16.dp)
             .windowInsetsPadding(WindowInsets.safeDrawing)
         ) {
             Column(modifier = Modifier

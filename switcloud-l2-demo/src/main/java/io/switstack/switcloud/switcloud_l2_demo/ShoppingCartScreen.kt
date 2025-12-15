@@ -64,7 +64,7 @@ fun ShoppingCartScreen(
                     Text("$$total")
                 }
             }
-            Column {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Action(buttonText = "Proceed with payment",
                        buttonType = ButtonType.Filled,
                        onClick = {

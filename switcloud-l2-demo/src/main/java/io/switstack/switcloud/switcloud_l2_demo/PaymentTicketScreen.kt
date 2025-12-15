@@ -121,8 +121,8 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                     }
                 }
             }
-            Column {
-                Action(modifier = Modifier.align(Alignment.CenterHorizontally),
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Action(
                        buttonText = stringResource(R.string.back_to_previous),
                        buttonType = ButtonType.Filled,
                        onClick = onBackToPreviousClick)
