@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
+import io.switstack.switcloud.switcloud_l2_demo.utils.AmountUtils
 import kotlinx.coroutines.delay
 
 @Composable
@@ -48,7 +49,7 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 
     val iconPayment = if (isShoppingCart) Icons.Filled.ShoppingCart else Icons.Filled.Payment
 
-    val amountFormatted = String.format("%.2f", amount.filter(Char::isDigit).toDouble())
+    val amountFormatted = AmountUtils.toUsdTwoDecimalString(amount)
 
     PaymentScreenContent(amountFormatted,
                          iconPayment,
