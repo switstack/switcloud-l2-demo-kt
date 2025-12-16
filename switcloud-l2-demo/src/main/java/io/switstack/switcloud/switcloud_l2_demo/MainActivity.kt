@@ -1,5 +1,6 @@
 package io.switstack.switcloud.switcloud_l2_demo
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -28,6 +29,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if(BuildConfig.DEBUG) {
+            println("${Build.BRAND} ${Build.PRODUCT}")
+            println("${Build.BRAND.uppercase()}_${Build.PRODUCT.uppercase()}")
+        }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         paymentViewModel.setupSwitcloudL2(this)
         setContent {
