@@ -95,7 +95,8 @@ enum class EmvTagEnum(val tagName: String) {
     TAG_9FAD("Issuer Script Results (Binary)"),
     TAG_9FAE("Transaction Context (Binary)"),
     TAG_9FAF("Card Production Life Cycle Data (Binary)"),
-    TAG_DF8129("OPS"),
+    TAG_DF8129("OPS"), // According to Mastercard spec
+    TAG_9F8210("OPS"), // According to C8 spec
     UNKNOWN("Unknown Tag");
 
     /**
