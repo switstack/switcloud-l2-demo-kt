@@ -31,10 +31,15 @@ import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum
+import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum.Companion.fromTag
+import io.switstack.switcloud.switcloud_l2_demo.data.OPSVerdictEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_onSurface
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_surface
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getOPSVerdict
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getOPSVerdictLabel
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getTagLabel
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getValueLabel
 import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
@@ -97,7 +102,7 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        tlvEntriesToMap(tlvEntries, transactionCounter).forEach { entry ->
+                        tlvEntriesToMap(tlvEntries, transactionCounter, success).forEach { entry ->
                             Row(modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 2.dp),
@@ -132,9 +137,18 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
     }
 }
 
-private fun tlvEntriesToMap(tlvEntries: List<TlvEntry>, transactionCounter: Int): Map<String, String> =
+private fun tlvEntriesToMap(tlvEntries: List<TlvEntry>, transactionCounter: Int, success: Boolean): Map<String, String> =
     tlvEntries.map { entry ->
-        getTagLabel(entry.tag) to getValueLabel(entry.tag, entry.value)
+        when(fromTag(entry.tag.uppercase())) {
+            EmvTagEnum.TAG_DF8129, EmvTagEnum.TAG_9F8210 -> {
+                if(getOPSVerdict(entry.value) == OPSVerdictEnum.PIN_REQUIRED) {
+                    getTagLabel(entry.tag) to getOPSVerdictLabel(success)
+                } else {
+                    getTagLabel(entry.tag) to getValueLabel(entry.tag, entry.value)
+                }
+            }
+            else -> getTagLabel(entry.tag) to getValueLabel(entry.tag, entry.value)
+        }
     }.toMutableList().apply {
         add(4, "Entry Method" to "Contactless")
         add("Approval number" to Random.nextInt(999999999).toString().padStart(10, '0'))

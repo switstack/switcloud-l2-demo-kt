@@ -8,7 +8,7 @@ class EmvUtils {
     companion object {
 
         fun getTagLabel(tag: String) = when (val tagEnum = fromTag(tag.uppercase())) {
-            EmvTagEnum.TAG_DF8129 -> "Status"
+            EmvTagEnum.TAG_DF8129, EmvTagEnum.TAG_9F8210 -> "Status"
             else -> tagEnum?.tagName ?: tag.uppercase()
         }
 
@@ -21,9 +21,8 @@ class EmvUtils {
                         else -> "Unknown"
                     }
                 }
-
                 EmvTagEnum.TAG_50 -> ByteArrayHexStringUtils.hexStringToAsciiString(value)
-                EmvTagEnum.TAG_DF8129 -> getOPSVerdictLabel(value)
+                EmvTagEnum.TAG_DF8129, EmvTagEnum.TAG_9F8210 -> getOPSVerdictLabel(value)
                 else -> value
             }
         }
@@ -36,9 +35,9 @@ class EmvUtils {
                 return OPSVerdictEnum.PIN_REQUIRED
             } else {
                 // PIN entry not required
-                if (OPSValueByteArray.isNotEmpty()
-                    && OPSValueByteArray[0] == 0x10.toByte() // Approved
-                    || OPSValueByteArray[0] == 0x30.toByte() // Online request
+                if (OPSValueByteArray.isNotEmpty() &&
+                    (OPSValueByteArray[0] == 0x10.toByte() // Approved
+                    || OPSValueByteArray[0] == 0x30.toByte()) // Online request
                 ) {
                     return OPSVerdictEnum.SUCCESS
                 } else {
@@ -52,5 +51,7 @@ class EmvUtils {
             OPSVerdictEnum.PIN_REQUIRED -> "APPROVED" // Only in case of the demo app
             OPSVerdictEnum.FAILURE -> "DECLINED"
         }
+
+        fun getOPSVerdictLabel(success: Boolean): String = if (success) { "APPROVED" } else { "DECLINED" }
     }
 }

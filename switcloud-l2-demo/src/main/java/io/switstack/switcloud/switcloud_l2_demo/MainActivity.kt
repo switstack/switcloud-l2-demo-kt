@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        paymentViewModel.initializeSwitcloudL2(this)
+        paymentViewModel.setupSwitcloudL2(this)
         setContent {
             Switcloudl2demoktTheme {
                 MyApp(paymentViewModel)

@@ -45,7 +45,7 @@ class PaymentViewModel() : ViewModel() {
 
     init {
         try {
-            // Initialize dependent services
+            // Setting reference to switcloud components
             glase = switcloudL2.glase()
             reader = switcloudL2.reader()
 
@@ -59,34 +59,30 @@ class PaymentViewModel() : ViewModel() {
         }
     }
 
-    fun initializeSwitcloudL2(activity: Activity) {
-        viewModelScope.launch(IO) {
-            // All SwitcloudL2 initialization happens here, off the main thread.
-            switcloudL2.setActivity(activity)
-            switcloudL2.initializeServices()
+    fun setupSwitcloudL2(activity: Activity) {
+        switcloudL2.setActivity(activity)
 
-            loadCapkCreateSchema(activity)?.let {
-                for (capk in it) {
-                    val cakey = TlvUtils.makeGlaseCAKey(capk)
-                    glase.addCAKey(cakey)
-                }
-            }
-
-            // Update the UI state to signal that initialization is complete.
-            _uiState.update { it.copy(initialized = true) }
-            println("SwitcloudL2 initialized")
-        }
+        // Update the UI state to signal that initialization is complete.
+        _uiState.update { it.copy(initialized = true) }
+        println("SwitcloudL2 initialized")
     }
 
     fun cleanupSwitcloudL2() {
         switcloudL2.cleanupServices()
     }
 
-    fun configureGlaseAndReader(context: Context) {
-        reader.configure(MokaConfig.readerParams)
+    fun initializeSwitcloudL2(context: Context) {
+        switcloudL2.initializeServices()
 
-        // TODO move entry point config in to a file if needed
+        reader.configure(MokaConfig.readerParams)
         glase.configureEntryPoint(EmvConfig.entryPointConfiguration)
+
+        loadCapkCreateSchema(context)?.let {
+            for (capk in it) {
+                val cakey = TlvUtils.makeGlaseCAKey(capk)
+                glase.addCAKey(cakey)
+            }
+        }
 
         loadEMVCreateSchema(context)?.let {
             for (emv in it) {
@@ -128,7 +124,6 @@ class PaymentViewModel() : ViewModel() {
 
             val capkMultiSchemeData = TlvUtils.parseJsonToScheme(jsonString, CapkMultiScheme::class.java)
 
-            // You can now use the parsed data
             if (capkMultiSchemeData != null) {
                 println("Successfully parsed capk: ${capkMultiSchemeData.capks.size} capks found!")
             }
@@ -159,8 +154,8 @@ class PaymentViewModel() : ViewModel() {
         switcloudL2.setPollingCancelled(false)
 
         viewModelScope.launch(IO) {
-            // Perform the rest of the configuration
-            configureGlaseAndReader(currentActivity)
+            // All SwitcloudL2 initialization happens here, off the main thread.
+            initializeSwitcloudL2(currentActivity)
 
             // Construct the 'trd' byte array in TLV format
             val trd = createTrd(amount)
@@ -191,7 +186,8 @@ class PaymentViewModel() : ViewModel() {
                     EmvTagEnum.TAG_9C,      //TT
                     EmvTagEnum.TAG_9A,      //Data
                     EmvTagEnum.TAG_9F02,    //Amount
-                    EmvTagEnum.TAG_DF8129,   //OPS
+                    EmvTagEnum.TAG_DF8129,   //OPS MASTERCARD
+                    EmvTagEnum.TAG_9F8210,   //OPS C8
                     EmvTagEnum.TAG_4F,      //AID
                     EmvTagEnum.TAG_5F20,      //Cardholder Name
                     EmvTagEnum.TAG_84,      //DF_Name
@@ -209,7 +205,7 @@ class PaymentViewModel() : ViewModel() {
                         glase.getTag(ByteArrayHexStringUtils.hexStringToByteArray(tag.hexTag))?.let { value ->
                             ticketData += value
 
-                            if (tag == EmvTagEnum.TAG_DF8129) {
+                            if (tag == EmvTagEnum.TAG_DF8129 || tag == EmvTagEnum.TAG_9F8210) {
                                 val opsHexString = ByteArrayHexStringUtils.byteArrayToHexString(value)
                                 val OPSTlvEntry = TlvUtils.parseTlvString(opsHexString).single()
                                 when (getOPSVerdict(OPSTlvEntry.value)) {
