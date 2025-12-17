@@ -5,11 +5,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -58,7 +54,6 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
 
     NavHost(
         navController = navController,
-        modifier = Modifier.windowInsetsPadding(WindowInsets.safeContent),
         startDestination = startDestination,
         route = "payment_flow"
     ) {
