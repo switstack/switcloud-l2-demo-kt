@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.InputTransformation
@@ -29,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -40,7 +39,7 @@ import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PaymentEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
+fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
     val customAmount = rememberTextFieldState()
     val keyboardVisible = WindowInsets.isImeVisible
 
@@ -48,7 +47,6 @@ fun PaymentEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
         Column(modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .windowInsetsPadding(WindowInsets.safeDrawing)
         ) {
             Column(modifier = Modifier
                 .weight(1f)
@@ -57,7 +55,7 @@ fun PaymentEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                 Text(modifier = Modifier
                     .fillMaxWidth()
                     .padding(32.dp),
-                     text = "Please enter amount",
+                     text = stringResource(R.string.enter_amount),
                      textAlign = TextAlign.Center,
                      style = MaterialTheme.typography.titleLarge)
                 Box(modifier = Modifier
@@ -140,8 +138,8 @@ class DigitOnlyInputTransformation : InputTransformation {
 
 @Preview(device = TABLET)
 @Composable
-fun PaymentEntryScreenPreview() {
+fun AmountEntryScreenPreview() {
     Switcloudl2demoktTheme() {
-        PaymentEntryScreen() { }
+        AmountEntryScreen() { }
     }
 }

@@ -10,14 +10,15 @@ import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 
 sealed interface ButtonType {
@@ -36,8 +37,11 @@ fun Action(modifier: Modifier = Modifier, buttonText: String, buttonType: Button
         .width(300.dp)
 
     val text: @Composable RowScope.() -> Unit = {
-        Text(buttonText,
-             maxLines = 1)
+        Text(
+            buttonText,
+            textAlign = TextAlign.Center,
+            autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.titleLarge.fontSize),
+            maxLines = 1)
     }
 
     when (buttonType) {
@@ -74,11 +78,13 @@ fun RoundAction(modifier: Modifier = Modifier,
                 buttonText: String,
                 buttonType: ButtonType,
                 onClick: (String) -> Unit) {
-    val buttonModifier = modifier.size(100.dp)
+    val buttonModifier = modifier.size(120.dp)
     val text: @Composable RowScope.() -> Unit = {
-        Text(buttonText,
-             maxLines = 1,
-             autoSize = TextAutoSize.StepBased(maxFontSize = 15.sp))
+        Text(
+            buttonText,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.bodyLarge.fontSize))
     }
 
     when (buttonType) {

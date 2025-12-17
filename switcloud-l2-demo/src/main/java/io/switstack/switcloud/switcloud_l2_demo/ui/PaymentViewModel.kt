@@ -258,6 +258,18 @@ class PaymentViewModel() : ViewModel() {
         switcloudL2.setPollingCancelled(true)
     }
 
+    fun setPinVerdict(success: Boolean) {
+        if (uiState.value.initialized) {
+            _uiState.update {
+                it.copy(
+                    success = success,
+                    showPinEntry = false,
+                    errorMessage = if (!success) "User cancelled" else null
+                )
+            }
+        }
+    }
+
     fun resetPaymentState() {
         cleanupSwitcloudL2()
         _uiState.update {

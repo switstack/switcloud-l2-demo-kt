@@ -71,7 +71,7 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
         }
 
         composable("payment_entry") {
-            PaymentEntryScreen() { total ->
+            AmountEntryScreen() { total ->
                 navController.navigate("payment/$total") {
                     popUpTo("payment_entry") { inclusive = true }
                 }
@@ -82,26 +82,43 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
             "payment/{amount}",
             arguments = listOf(navArgument("amount") { type = NavType.StringType })
         ) { backStackEntry ->
-
             val amount = backStackEntry.arguments?.getString("amount") ?: "0"
 
-            PaymentScreen(paymentViewModel = paymentViewModel,
-                          amount = amount,
-                          isShoppingCart = startDestination == "shopping_cart",
-                          onPaymentVerdict = { success, tlvStream ->
-                              paymentViewModel.resetPaymentState()
-                              navController.navigate("payment_ticket/$success?tlvStream=$tlvStream") {
-                                  // Pop up to the start screen to prevent going back to payment
-                                  popUpTo(startDestination) { inclusive = false }
-                              }
-                          },
-                          onBackToPreviousClick = {
-                              paymentViewModel.resetPaymentState()
-                              navController.navigate(startDestination)
-                          },
-                          onCancelClick = {
-                              paymentViewModel.cancelPayment()
-                          }
+            PaymentScreen(
+                paymentViewModel = paymentViewModel,
+                amount = amount,
+                isShoppingCart = startDestination == "shopping_cart",
+                onPinRequired = {
+                    navController.navigate("pin_entry/$amount") {
+                        popUpTo("payment/$amount") { inclusive = false }
+                    }
+                },
+                onPaymentVerdict = { success, tlvStream ->
+                    paymentViewModel.resetPaymentState()
+                    navController.navigate("payment_ticket/$success?tlvStream=$tlvStream") {
+                        // Pop up to the start screen to prevent going back to payment
+                        popUpTo(startDestination) { inclusive = false }
+                    }
+                },
+                onBackToPreviousClick = {
+                    paymentViewModel.resetPaymentState()
+                    navController.navigate(startDestination)
+                },
+                onCancelClick = {
+                    paymentViewModel.cancelPayment()
+                }
+            )
+        }
+
+        composable(
+            "pin_entry/{amount}",
+            arguments = listOf(navArgument("amount") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val amount = backStackEntry.arguments?.getString("amount") ?: "0"
+
+            PinEntryScreen(
+                paymentViewModel = paymentViewModel,
+                onPinValidationClick = { navController.navigate("payment/$amount") }
             )
         }
 

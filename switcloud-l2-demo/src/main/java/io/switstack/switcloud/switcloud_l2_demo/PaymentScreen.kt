@@ -46,6 +46,7 @@ import kotlinx.coroutines.delay
 fun PaymentScreen(paymentViewModel: PaymentViewModel,
                   amount: String,
                   isShoppingCart: Boolean = false,
+                  onPinRequired: () -> Unit,
                   onPaymentVerdict: (Boolean, String?) -> Unit,
                   onBackToPreviousClick: () -> Unit,
                   onCancelClick: () -> Unit
@@ -56,22 +57,33 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 
     val amountFormatted = AmountUtils.toUsdTwoDecimalString(amount)
 
-    PaymentScreenContent(amountFormatted,
-                         iconPayment,
-                         uiState.initialized,
-                         uiState.success,
-                         uiState.errorMessage,
-                         onBackToPreviousClick,
-                         onCancelClick)
+    PaymentScreenContent(
+        amountFormatted,
+        iconPayment,
+        uiState.initialized,
+        uiState.success,
+        uiState.errorMessage,
+        onBackToPreviousClick,
+        onCancelClick)
 
     LaunchedEffect(uiState.initialized) {
-        if (uiState.initialized) {
+        if (uiState.initialized
+            && !uiState.success
+            && uiState.errorMessage == null
+            && uiState.tlvString == null)
+        {
             paymentViewModel.processPayment(amountFormatted)
         }
     }
 
-    LaunchedEffect(uiState.tlvString) { //replace with success whn pin screen will be implemented
-        delay(1000)
+    LaunchedEffect(uiState.showPinEntry) {
+        if (uiState.showPinEntry) {
+            onPinRequired()
+        }
+    }
+
+    LaunchedEffect(uiState.success) {
+        delay(1500)
         uiState.tlvString?.let { tlvStream ->
             onPaymentVerdict(uiState.success, tlvStream)
         }
@@ -159,7 +171,7 @@ fun PaymentScreenContent(amount: String,
                     Text(modifier = Modifier
                         .padding(top = 32.dp)
                         .align(Alignment.CenterHorizontally),
-                        text = "Loading in progress...",
+                        text = stringResource(R.string.loading),
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.titleLarge)
                 }
@@ -186,7 +198,7 @@ fun PaymentScreenContent(amount: String,
                         }
                     }
                     Text(modifier = Modifier.padding(top = 8.dp),
-                        text = "Present card",
+                        text = stringResource(R.string.present_card),
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.titleLarge)
                 }
@@ -203,7 +215,7 @@ fun PaymentScreenContent(amount: String,
             } ?: run {
                 if (ready && !success) {
                     Action(
-                        buttonText = "Cancel",
+                        buttonText = stringResource(R.string.cancel),
                         buttonType = ButtonType.Tonal,
                         onClick = onCancelClick)
                 }
