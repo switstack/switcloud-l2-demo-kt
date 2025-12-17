@@ -96,7 +96,7 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                            horizontalAlignment = Alignment.Start
                     ) {
                         Text(modifier = Modifier.fillMaxWidth(),
-                             text = "Payment Receipt",
+                             text = stringResource(R.string.payment_receipt),
                              textAlign = TextAlign.Center,
                              style = ticketTextStyle
                         )

@@ -2,9 +2,13 @@ package io.switstack.switcloud.switcloud_l2_demo.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -69,6 +73,24 @@ private val DarkColors = darkColorScheme(
     scrim = md_theme_dark_scrim
 )
 
+private val CustomTypography = Typography(
+    displayLarge = TextStyle(fontSize = 57.sp, fontWeight = FontWeight.Bold),
+    displayMedium = TextStyle(fontSize = 45.sp, fontWeight = FontWeight.Bold),
+    displaySmall = TextStyle(fontSize = 36.sp, fontWeight = FontWeight.Bold),
+    headlineLarge = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.SemiBold),
+    headlineMedium = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.SemiBold),
+    headlineSmall = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.SemiBold),
+    titleLarge = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Medium),
+    titleMedium = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium),
+    titleSmall = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
+    bodyLarge = TextStyle(fontSize = 18. sp, fontWeight = FontWeight.Normal), // Increased from 16.sp
+    bodyMedium = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
+    bodySmall = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal),
+    labelLarge = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
+    labelMedium = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Medium),
+    labelSmall = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Medium)
+)
+
 @Composable
 fun Switcloudl2demoktTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
@@ -82,6 +104,7 @@ fun Switcloudl2demoktTheme(
 
     MaterialTheme(
         colorScheme = colors,
+        typography = CustomTypography,
         content = content
     )
 }
