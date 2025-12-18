@@ -179,7 +179,7 @@ fun PaymentScreenContent(amount: String,
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(shape = RoundedCornerShape(64.dp, 64.dp, 0.dp, 0.dp))
+                        .clip(shape = RoundedCornerShape(48.dp, 48.dp, 0.dp, 0.dp))
                         .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
                 )
             }

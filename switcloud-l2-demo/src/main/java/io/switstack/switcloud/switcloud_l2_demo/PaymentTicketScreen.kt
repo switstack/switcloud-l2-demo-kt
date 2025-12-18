@@ -1,26 +1,35 @@
 package io.switstack.switcloud.switcloud_l2_demo
 
 import android.content.res.Configuration
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -35,6 +44,7 @@ import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum.Companion.fromTag
 import io.switstack.switcloud.switcloud_l2_demo.data.OPSVerdictEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
+import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_onSurface
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_surface
@@ -66,71 +76,100 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                                transactionCounter: Int,
                                onBackToPreviousClick: () -> Unit
 ) {
+
+    val config = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        PaymentDisplayConfig(R.drawable.bg_payment_land, 0.18f, MaterialTheme.typography.displayLarge)
+    } else {
+        PaymentDisplayConfig(R.drawable.bg_payment_port, 0.12f, MaterialTheme.typography.displaySmall)
+    }
+
     val ticketTextStyle = TextStyle(
         fontSize = if (isCompactDevice()) 12.sp else 18.sp,
         fontFamily = FontFamily.Monospace,
         color = md_theme_light_onSurface
     )
 
-    Surface(color = MaterialTheme.colorScheme.background) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    Surface() {
+        Image(
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillHeight,
+            painter = painterResource(config.backgroundResource),
+            contentDescription = "Payment background")
+
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight(config.headerPercent)
+                    .fillMaxWidth())
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .wrapContentWidth()
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .fillMaxSize()
+                    .clip(shape = RoundedCornerShape(48.dp, 48.dp, 0.dp, 0.dp))
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Surface(modifier = Modifier
-                    .shadow(16.dp, clip = false)
-                    .widthIn(max = 400.dp),
-                        color = md_theme_light_surface
+                Spacer(modifier = Modifier.weight(0.8f))
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Column(modifier = Modifier.padding(16.dp),
-                           horizontalAlignment = Alignment.Start
+                    Surface(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)
+                            .shadow(16.dp, clip = false)
+                            .widthIn(max = 500.dp),
+                        color = md_theme_light_surface
                     ) {
-                        Text(modifier = Modifier.fillMaxWidth(),
-                             text = stringResource(R.string.payment_receipt),
-                             textAlign = TextAlign.Center,
-                             style = ticketTextStyle
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.Start
+                        ) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(R.string.payment_receipt),
+                                textAlign = TextAlign.Center,
+                                style = ticketTextStyle
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        tlvEntriesToMap(tlvEntries, transactionCounter, success).forEach { entry ->
-                            Row(modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 2.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(text = entry.key,
-                                     maxLines = 1,
-                                     style = ticketTextStyle,
-                                     overflow = TextOverflow.Ellipsis,
-                                     modifier = Modifier
-                                         .padding(end = 8.dp)
-                                         .weight(1f)
-                                )
-                                Text(textAlign = TextAlign.End,
-                                     text = entry.value,
-                                     maxLines = 1,
-                                     style = ticketTextStyle
-                                )
+                            tlvEntriesToMap(tlvEntries, transactionCounter, success).forEach { entry ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 2.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = entry.key,
+                                        maxLines = 1,
+                                        style = ticketTextStyle,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier
+                                            .padding(end = 8.dp)
+                                            .weight(1f)
+                                    )
+                                    Text(
+                                        textAlign = TextAlign.End,
+                                        text = entry.value,
+                                        maxLines = 1,
+                                        style = ticketTextStyle
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Spacer(modifier = Modifier.weight(0.5f))
                 Action(
-                       buttonText = stringResource(R.string.back_to_previous),
-                       buttonType = ButtonType.Filled,
-                       onClick = onBackToPreviousClick)
+                    buttonText = stringResource(R.string.back_to_previous),
+                    buttonType = ButtonType.Elevated,
+                    buttonColors = ButtonDefaults.elevatedButtonColors().copy(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    onClick = onBackToPreviousClick)
+                Spacer(modifier = Modifier.weight(0.5f))
                 Footer()
             }
         }

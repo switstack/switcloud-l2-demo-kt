@@ -49,7 +49,7 @@ fun Action(modifier: Modifier = Modifier, buttonText: String, buttonType: Button
     when (buttonType) {
         ButtonType.Elevated -> ElevatedButton(
             modifier = buttonModifier,
-            colors = ButtonDefaults.elevatedButtonColors().copy(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+            colors = buttonColors ?: ButtonDefaults.elevatedButtonColors().copy(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
             onClick = onClick,
             content = text)
 
