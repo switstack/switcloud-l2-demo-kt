@@ -82,7 +82,6 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
             PaymentScreen(
                 paymentViewModel = paymentViewModel,
                 amount = amount,
-                isShoppingCart = startDestination == "shopping_cart",
                 onPinRequired = {
                     navController.navigate("pin_entry/$amount") {
                         popUpTo("payment/$amount") { inclusive = false }
