@@ -15,9 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Payment
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,8 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.switstack.switcloud.switcloud_l2_demo.data.NfcAntennaDeviceEnum
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedValuesConfig
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedValuesConfig.ImageConfig
+import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues
+import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues.ImageConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.AmountUtils
@@ -54,15 +51,12 @@ import kotlinx.coroutines.delay
 @Composable
 fun PaymentScreen(paymentViewModel: PaymentViewModel,
                   amount: String,
-                  isShoppingCart: Boolean = false,
                   onPinRequired: () -> Unit,
                   onPaymentVerdict: (Boolean, String?) -> Unit,
                   onBackToPreviousClick: () -> Unit,
                   onCancelClick: () -> Unit
 ) {
     val uiState by paymentViewModel.uiState.collectAsStateWithLifecycle()
-
-    val iconPayment = if (isShoppingCart) Icons.Filled.ShoppingCart else Icons.Filled.Payment
 
     val amountFormatted = AmountUtils.toUsdTwoDecimalString(amount)
 
@@ -72,15 +66,6 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
         uiState.errorMessage,
         onBackToPreviousClick,
         onCancelClick)
-
-   /* PaymentScreenContent(
-        amountFormatted,
-        iconPayment,
-        uiState.initialized,
-        uiState.success,
-        uiState.errorMessage,
-        onBackToPreviousClick,
-        onCancelClick)*/
 
     LaunchedEffect(uiState.initialized) {
         if (uiState.initialized
@@ -116,15 +101,23 @@ fun PaymentScreenContent(amount: String,
 ) {
     val config = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
         PaymentDisplayConfig(
-            R.drawable.bg_payment_land,
+            when {
+                errorMessage != null -> R.drawable.bg_error_land
+                success              -> R.drawable.bg_success_land
+                else                 -> R.drawable.bg_payment_land
+            },
             0.27f,
             MaterialTheme.typography.displayLarge
 
         )
     } else {
         PaymentDisplayConfig(
-            R.drawable.bg_payment_port,
-            0.31f,
+            when {
+                errorMessage != null -> R.drawable.bg_error_port
+                success              -> R.drawable.bg_success_port
+                else                 -> R.drawable.bg_payment_port
+            },
+            0.32f,
             MaterialTheme.typography.displaySmall
         )
     }
@@ -140,31 +133,35 @@ fun PaymentScreenContent(amount: String,
 
     val contentValues = when {
         errorMessage != null -> {
-            PaymentDisplayedValuesConfig(
+            PaymentDisplayedStateValues(
                 ImageConfig(R.drawable.ic_crossmark, 100.dp, "Error crossmark"),
                 errorMessage,
-                R.string.back_to_previous
+                R.string.back_to_previous,
+                MaterialTheme.colorScheme.error
             )
         }
         success -> {
-            PaymentDisplayedValuesConfig(
+            PaymentDisplayedStateValues(
                 ImageConfig(R.drawable.ic_checkmark, 100.dp, "Success checkmark"),
                 stringResource(R.string.success),
-                null
+                null,
+                MaterialTheme.colorScheme.tertiary
             )
         }
         !ready -> {
-            PaymentDisplayedValuesConfig(
+            PaymentDisplayedStateValues(
                 null,
                 stringResource(R.string.loading),
+                null,
                 null
             )
         }
         else -> {
-            PaymentDisplayedValuesConfig(
+            PaymentDisplayedStateValues(
                 ImageConfig(R.drawable.ic_contactless, 200.dp, "EMVCo contactless logo"),
                 stringResource(R.string.present_card),
-                R.string.cancel
+                R.string.cancel,
+                null
             )
         }
     }
@@ -217,17 +214,18 @@ fun PaymentScreenContent(amount: String,
                             modifier = Modifier.sizeIn(maxWidth = imageConfig.width),
                             painter = painterResource(id = imageConfig.drawable),
                             contentDescription = imageConfig.contentDescription,
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
+                            colorFilter = ColorFilter.tint(contentValues.colorTint ?: MaterialTheme.colorScheme.onBackground)
                         )
                     } ?: run {
                         CircularProgressIndicator(modifier = Modifier.size(75.dp))
                     }
                 }
 
-                Column(modifier = Modifier.weight(0.5f),//.padding(top =  contentValues.imageConfig?.spacerHeight ?: 0.dp),
+                Column(modifier = Modifier.weight(0.5f),
                         horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(modifier = Modifier.padding(bottom = 16.dp),
                         text = contentValues.text,
+                        color = contentValues.colorTint ?: MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Center,
                         style = if(errorMessage != null)
                             MaterialTheme.typography.headlineSmall
@@ -252,7 +250,6 @@ fun PaymentScreenContent(amount: String,
             }
         }
     }
-
 
     // Used for development only, when using previews to check that nfc logo is well centered
     if (LocalInspectionMode.current) {
