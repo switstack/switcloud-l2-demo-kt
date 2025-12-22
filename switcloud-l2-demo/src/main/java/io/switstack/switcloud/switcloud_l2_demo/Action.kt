@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
@@ -30,10 +32,10 @@ sealed interface ButtonType {
 }
 
 @Composable
-fun Action(modifier: Modifier = Modifier, buttonText: String, buttonType: ButtonType, onClick: () -> Unit) {
+fun Action(modifier: Modifier = Modifier, buttonText: String, buttonType: ButtonType, buttonColors: ButtonColors? = null, onClick: () -> Unit) {
     val buttonModifier = modifier
         .padding(vertical = 25.dp)
-        .height(80.dp)
+        .height(60.dp)
         .width(300.dp)
 
     val text: @Composable RowScope.() -> Unit = {
@@ -47,26 +49,31 @@ fun Action(modifier: Modifier = Modifier, buttonText: String, buttonType: Button
     when (buttonType) {
         ButtonType.Elevated -> ElevatedButton(
             modifier = buttonModifier,
+            colors = ButtonDefaults.elevatedButtonColors().copy(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
             onClick = onClick,
             content = text)
 
         ButtonType.Filled -> Button(
             modifier = buttonModifier,
+            colors = buttonColors ?: ButtonDefaults.buttonColors(),
             onClick = onClick,
             content = text)
 
         ButtonType.Outlined -> OutlinedButton(
             modifier = buttonModifier,
+            colors = buttonColors ?: ButtonDefaults.outlinedButtonColors(),
             onClick = onClick,
             content = text)
 
         ButtonType.Text -> TextButton(
             modifier = buttonModifier,
+            colors = buttonColors ?: ButtonDefaults.textButtonColors(),
             onClick = onClick,
             content = text)
 
         ButtonType.Tonal -> FilledTonalButton(
             modifier = buttonModifier,
+            colors = buttonColors ?: ButtonDefaults.filledTonalButtonColors(),
             onClick = onClick,
             content = text)
     }

@@ -6,6 +6,7 @@
     <string name="back_to_previous">Back</string>
     <string name="enter_your_pin">Enter your PIN</string>
     <string name="cancel">Cancel</string>
+    <string name="success">Success</string>
     <string name="enter_amount">Please enter amount</string>
     <string name="present_card">Present card</string>
     <string name="loading">Loading in progress...</string>
