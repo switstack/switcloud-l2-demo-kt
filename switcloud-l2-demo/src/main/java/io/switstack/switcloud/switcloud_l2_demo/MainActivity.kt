@@ -1,5 +1,6 @@
 package io.switstack.switcloud.switcloud_l2_demo
 
+import LockScreenOrientation
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -36,6 +37,9 @@ class MainActivity : AppCompatActivity() {
         paymentViewModel.setupSwitcloudL2(this)
         setContent {
             Switcloudl2demoktTheme {
+                // Call the orientation locker here
+                LockScreenOrientation()
+
                 MyApp(paymentViewModel)
             }
         }
