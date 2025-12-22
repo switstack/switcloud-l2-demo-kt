@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices.PIXEL_3
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_7
 import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
@@ -78,7 +80,7 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
 ) {
 
     val config = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        PaymentDisplayConfig(R.drawable.bg_payment_land, 0.18f, MaterialTheme.typography.displayLarge)
+        PaymentDisplayConfig(R.drawable.bg_payment_land, 0.10f, MaterialTheme.typography.displayLarge)
     } else {
         PaymentDisplayConfig(R.drawable.bg_payment_port, 0.12f, MaterialTheme.typography.displaySmall)
     }
@@ -106,17 +108,18 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                     .fillMaxSize()
                     .clip(shape = RoundedCornerShape(48.dp, 48.dp, 0.dp, 0.dp))
                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Spacer(modifier = Modifier.weight(0.8f))
+                Spacer(modifier = Modifier.heightIn(max = 60.dp))
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Surface(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 32.dp)
                             .shadow(16.dp, clip = false)
                             .widthIn(max = 500.dp),
                         color = md_theme_light_surface
@@ -160,7 +163,6 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                         }
                     }
                 }
-                Spacer(modifier = Modifier.weight(0.5f))
                 Action(
                     buttonText = stringResource(R.string.back_to_previous),
                     buttonType = ButtonType.Elevated,
@@ -169,7 +171,6 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     ),
                     onClick = onBackToPreviousClick)
-                Spacer(modifier = Modifier.weight(0.5f))
                 Footer()
             }
         }
@@ -208,6 +209,7 @@ private val sampleTlv = listOf(
 )
 
 @Preview(device = PIXEL_7)
+@Preview(device = PIXEL_3)
 @Preview(device = TABLET)
 @Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview(device = TABLET,
