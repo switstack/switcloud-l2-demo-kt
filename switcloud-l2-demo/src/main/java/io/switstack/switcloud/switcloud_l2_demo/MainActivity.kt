@@ -112,7 +112,7 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
 
             PinEntryScreen(
                 paymentViewModel = paymentViewModel,
-                onPinValidationClick = { navController.navigate("payment/$amount") }
+                onPinVerified = { navController.navigate("payment/$amount") }
             )
         }
 
