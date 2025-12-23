@@ -64,14 +64,14 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
     PaymentScreenContent(amountFormatted,
         uiState.initialized,
         uiState.success,
-        uiState.errorMessage,
+        uiState.declinedOpsStatusAndErrorIndicationMessage ?: uiState.errorMessageResource?.let { stringResource(it) },
         onBackToPreviousClick,
         onCancelClick)
 
     LaunchedEffect(uiState.initialized) {
         if (uiState.initialized
-            && !uiState.success
-            && uiState.errorMessage == null
+            && uiState.success == null
+            && uiState.errorMessageResource == null
             && uiState.tlvString == null)
         {
             paymentViewModel.processPayment(amountFormatted)
@@ -85,26 +85,28 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
     }
 
     LaunchedEffect(uiState.success) {
-        delay(1500)
-        uiState.tlvString?.let { tlvStream ->
-            onPaymentVerdict(uiState.success, tlvStream)
+        delay(3000)
+        if(uiState.success != null) {
+            uiState.tlvString?.let { tlvStream ->
+                onPaymentVerdict(uiState.success == true, tlvStream)
+            }
         }
     }
 }
 
 @Composable
 fun PaymentScreenContent(amount: String,
-                            ready: Boolean,
-                            success: Boolean,
-                            errorMessage: String?,
-                            onBackToPreviousClick: () -> Unit,
-                            onCancelClick: () -> Unit
+                         ready: Boolean,
+                         success: Boolean?,
+                         errorMessage: String?,
+                         onBackToPreviousClick: () -> Unit,
+                         onCancelClick: () -> Unit
 ) {
     val config = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
         PaymentDisplayConfig(
             when {
                 errorMessage != null -> R.drawable.bg_error_land
-                success              -> R.drawable.bg_success_land
+                success == true      -> R.drawable.bg_success_land
                 else                 -> R.drawable.bg_payment_land
             },
             0.27f,
@@ -115,7 +117,7 @@ fun PaymentScreenContent(amount: String,
         PaymentDisplayConfig(
             when {
                 errorMessage != null -> R.drawable.bg_error_port
-                success              -> R.drawable.bg_success_port
+                success == true      -> R.drawable.bg_success_port
                 else                 -> R.drawable.bg_payment_port
             },
             0.32f,
@@ -133,15 +135,29 @@ fun PaymentScreenContent(amount: String,
     }
 
     val contentValues = when {
-        errorMessage != null -> {
+        errorMessage != null || success == false -> {
+            val displayedMessage = errorMessage ?: stringResource(R.string.declined)
             PaymentDisplayedStateValues(
                 ImageConfig(R.drawable.ic_crossmark, 100.dp, "Error crossmark"),
-                errorMessage,
-                R.string.back_to_previous,
+                displayedMessage,
+                when {
+                    success == false && displayedMessage !in listOf(
+                        stringResource(R.string.error_loading_emv_config),
+                        stringResource(R.string.error_loading_capks),
+                        stringResource(R.string.error_timeout),
+                        stringResource(R.string.error_failure),
+                        stringResource(R.string.error_pre_processing),
+                        stringResource(R.string.error_card_detection),
+                        stringResource(R.string.error_combination_selection),
+                        stringResource(R.string.error_not_ready),
+                        stringResource(R.string.error_init_failed)
+                    )  -> null
+                    else -> R.string.back_to_previous
+                },
                 MaterialTheme.colorScheme.error
             )
         }
-        success -> {
+        success == true -> {
             PaymentDisplayedStateValues(
                 ImageConfig(R.drawable.ic_checkmark, 100.dp, "Success checkmark"),
                 stringResource(R.string.success),
