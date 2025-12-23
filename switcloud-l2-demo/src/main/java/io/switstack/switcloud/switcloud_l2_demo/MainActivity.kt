@@ -29,6 +29,10 @@ class MainActivity : AppCompatActivity() {
             println("${Build.BRAND.uppercase()}_${Build.PRODUCT.uppercase()}")
         }
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        val inserts = WindowCompat.getInsetsController(window, window.decorView)
+        inserts.hide(android.view.WindowInsets.Type.systemBars())
+
         paymentViewModel.setupSwitcloudL2(this)
         setContent {
             Switcloudl2demoktTheme {
