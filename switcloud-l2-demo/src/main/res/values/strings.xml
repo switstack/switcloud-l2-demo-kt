@@ -24,4 +24,6 @@
     <string name="error_not_ready">SwitCloudL2 is not ready</string>
     <string name="error_user_cancelled">User cancelled</string>
     <string name="error_init_failed">Initialization failed</string>
+    <string name="error_empty_candidate_list">Empty candidate list</string>
+    <string name="error_no_selected_combination">No selected combination</string>
 </resources>

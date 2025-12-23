@@ -23,8 +23,10 @@ import io.switstack.switcloud.switcloudapi.model.EMVCreateSchema
 import io.switstack.switcloud.switcloudl2.IGlase
 import io.switstack.switcloud.switcloudl2.IReader
 import io.switstack.switcloud.switcloudl2.SwitcloudL2
+import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2EmptyCandidateListException
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2Exception
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2InterruptedException
+import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2NoSelectedCombinationException
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2NotFoundException
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2TimeoutException
 import io.switstack.switcloud.switcloudl2.helpers.CardInterfaceType
@@ -275,6 +277,14 @@ class PaymentViewModel() : ViewModel() {
             } catch (e: SwitcloudL2InterruptedException) {
                 _uiState.update {
                     it.copy(errorMessageResource = R.string.error_user_cancelled)
+                }
+            } catch (e: SwitcloudL2NoSelectedCombinationException) {
+                _uiState.update {
+                    it.copy(errorMessageResource = R.string.error_no_selected_combination)
+                }
+            } catch (e: SwitcloudL2EmptyCandidateListException) {
+                _uiState.update {
+                    it.copy(errorMessageResource = R.string.error_empty_candidate_list)
                 }
             } catch (e: SwitcloudL2Exception) {
                 _uiState.update {
