@@ -91,15 +91,15 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
                     }
                 },
                 onPaymentVerdict = { success, tlvStream ->
-                    paymentViewModel.resetPaymentState()
                     navController.navigate("payment_ticket/$success?tlvStream=$tlvStream") {
                         // Pop up to the start screen to prevent going back to payment
                         popUpTo(startDestination) { inclusive = false }
                     }
+                    paymentViewModel.resetPaymentState()
                 },
                 onBackToPreviousClick = {
-                    paymentViewModel.resetPaymentState()
                     navController.navigate(startDestination)
+                    paymentViewModel.resetPaymentState()
                 },
                 onCancelClick = {
                     paymentViewModel.cancelPayment()

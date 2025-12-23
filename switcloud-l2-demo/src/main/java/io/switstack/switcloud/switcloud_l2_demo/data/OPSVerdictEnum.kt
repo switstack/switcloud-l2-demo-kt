@@ -1,7 +1,7 @@
 package io.switstack.switcloud.switcloud_l2_demo.data
 
 enum class OPSVerdictEnum {
-    SUCCESS,
+    APPROVED,
     PIN_REQUIRED,
-    FAILURE
+    DECLINED
 }

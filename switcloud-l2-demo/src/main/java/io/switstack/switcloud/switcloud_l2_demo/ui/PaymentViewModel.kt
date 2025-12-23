@@ -4,12 +4,15 @@ import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.switstack.switcloud.switcloud_l2_demo.R
 import io.switstack.switcloud.switcloud_l2_demo.data.CapkMultiScheme
 import io.switstack.switcloud.switcloud_l2_demo.data.EmvMultiScheme
 import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.OPSVerdictEnum
 import io.switstack.switcloud.switcloud_l2_demo.utils.ByteArrayHexStringUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvConfig
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getErrorIndication
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getOPSStatus
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getOPSVerdict
 import io.switstack.switcloud.switcloud_l2_demo.utils.MokaConfig
 import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
@@ -50,10 +53,11 @@ class PaymentViewModel() : ViewModel() {
             reader = switcloudL2.reader()
 
         } catch (e: Exception) {
+            println("Initialization failed: ${e.message}")
             _uiState.update {
                 it.copy(
                     initialized = false,
-                    errorMessage = "Initialization failed: ${e.message}"
+                    errorMessageResource = R.string.error_init_failed
                 )
             }
         }
@@ -112,7 +116,7 @@ class PaymentViewModel() : ViewModel() {
 
         } catch (e: Exception) {
             _uiState.update {
-                it.copy(errorMessage = "Failed to load EMV Config")
+                it.copy(errorMessageResource = R.string.error_loading_emv_config)
             }
             return null
         }
@@ -132,7 +136,7 @@ class PaymentViewModel() : ViewModel() {
 
         } catch (e: Exception) {
             _uiState.update {
-                it.copy(errorMessage = "Failed to load CAPK list")
+                it.copy(errorMessageResource = R.string.error_loading_capks)
             }
             return null
         }
@@ -142,7 +146,7 @@ class PaymentViewModel() : ViewModel() {
     fun processPayment(amount: String) {
         // Guard clause to prevent processing before initialization is complete.
         if (!uiState.value.initialized) {
-            _uiState.update { it.copy(errorMessage = "SwitCloudL2 is not ready.") }
+            _uiState.update { it.copy(errorMessageResource = R.string.error_not_ready) }
             return
         }
 
@@ -164,19 +168,19 @@ class PaymentViewModel() : ViewModel() {
                 val preProcessingResult = glase.preProcessing(trd)
                 if (!preProcessingResult.second)
                     _uiState.update {
-                        it.copy(errorMessage = "Pre-processing failed")
+                        it.copy(errorMessageResource = R.string.error_pre_processing)
                     }
 
                 val card = glase.protocolActivation(null)
                 if (card != CardInterfaceType.CARD_INTERFACE_TYPE_CONTACTLESS)
                     _uiState.update {
-                        it.copy(errorMessage = "Card detection error")
+                        it.copy(errorMessageResource = R.string.error_card_detection)
                     }
 
                 val combinationSelectionResult = glase.combinationSelection()
                 if (!combinationSelectionResult.second)
                     _uiState.update {
-                        it.copy(errorMessage = "Combination selection failed")
+                        it.copy(errorMessageResource = R.string.error_combination_selection)
                     }
 
                 glase.kernelActivation(null)
@@ -209,9 +213,9 @@ class PaymentViewModel() : ViewModel() {
                                 val opsHexString = ByteArrayHexStringUtils.byteArrayToHexString(value)
                                 val OPSTlvEntry = TlvUtils.parseTlvString(opsHexString).single()
                                 when (getOPSVerdict(OPSTlvEntry.value)) {
-                                    OPSVerdictEnum.SUCCESS -> success = true
+                                    OPSVerdictEnum.APPROVED     -> success = true
                                     OPSVerdictEnum.PIN_REQUIRED -> pinEntryRequired = true
-                                    OPSVerdictEnum.FAILURE -> success = false
+                                    OPSVerdictEnum.DECLINED     -> success = false
                                 }
                             }
                         }
@@ -221,27 +225,67 @@ class PaymentViewModel() : ViewModel() {
                     }
                 }
 
+                // Managing OPS status and Error indication when declined status
+                if(!success && !pinEntryRequired) {
+                    var errorMessage = ""
+                    val opsStatusAndErrorIndicationTags = listOf(EmvTagEnum.TAG_DF8129, EmvTagEnum.TAG_9F8210,EmvTagEnum.TAG_DF8115)
+
+                    for (tag in opsStatusAndErrorIndicationTags) {
+                        try {
+                            glase.getTag(ByteArrayHexStringUtils.hexStringToByteArray(tag.hexTag))?.let { value ->
+                                val hexString = ByteArrayHexStringUtils.byteArrayToHexString(value)
+                                val tlvEntry = TlvUtils.parseTlvString(hexString).single()
+                                when(tag) {
+                                    EmvTagEnum.TAG_DF8129,
+                                    EmvTagEnum.TAG_9F8210 -> {
+
+                                        getOPSStatus(tlvEntry.value)?.let { errorMessage += it }
+                                    }
+                                    EmvTagEnum.TAG_DF8115 -> {
+                                        getErrorIndication(tlvEntry.value)?.let {
+                                            errorMessage += " ($it)"
+                                        }
+                                    }
+                                    else                  -> { /* should not happened because TAGS are defined by opsStatusAndErrorIndicationTags */ }
+                                }
+                            }
+                        } catch (e: SwitcloudL2NotFoundException) {
+                            // Skip that tag
+                            println("Tag not found for status or error indication : ${tag.name}")
+                        }
+                    }
+                    _uiState.update {
+                        it.copy(declinedOpsStatusAndErrorIndicationMessage = errorMessage)
+                    }
+                }
+
                 val tlvString = ByteArrayHexStringUtils.byteArrayToHexString(ticketData)
 
                 _uiState.update {
                     if (pinEntryRequired)
                         it.copy(showPinEntry = true, tlvString = tlvString)
                     else
-                        it.copy(success = success, tlvString = tlvString, errorMessage = "Failure".takeUnless { success })
+                        it.copy(success = success, tlvString = tlvString)
                 }
 
             } catch (e: SwitcloudL2TimeoutException) {
                 _uiState.update {
-                    it.copy(errorMessage = "Card detection timeout")
+                    it.copy(errorMessageResource = R.string.error_timeout)
                 }
             } catch (e: SwitcloudL2InterruptedException) {
                 _uiState.update {
-                    it.copy(errorMessage = "User cancelled")
+                    it.copy(errorMessageResource = R.string.error_user_cancelled)
                 }
             } catch (e: SwitcloudL2Exception) {
                 _uiState.update {
-                    it.copy(errorMessage = e.message)
+                    it.copy(errorMessageResource = R.string.declined)
                 }
+                println(e.message)
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessageResource = R.string.declined)
+                }
+                println(e.message)
             } finally {
                 cleanupSwitcloudL2()
             }
@@ -251,7 +295,7 @@ class PaymentViewModel() : ViewModel() {
     fun cancelPayment() {
         // Guard clause to prevent processing before initialization is complete.
         if (!uiState.value.initialized) {
-            _uiState.update { it.copy(errorMessage = "SwitCloudL2 is not ready.") }
+            _uiState.update { it.copy(errorMessageResource = R.string.error_not_ready) }
             return
         }
 
@@ -264,7 +308,7 @@ class PaymentViewModel() : ViewModel() {
                 it.copy(
                     success = success,
                     showPinEntry = false,
-                    errorMessage = if (!success) "User cancelled" else null
+                    errorMessageResource = if (!success) R.string.error_user_cancelled else null
                 )
             }
         }
@@ -276,8 +320,9 @@ class PaymentViewModel() : ViewModel() {
             it.copy(
                 showPinEntry = false,
                 tlvString = null,
-                success = false,
-                errorMessage = null
+                success = null,
+                errorMessageResource = null,
+                declinedOpsStatusAndErrorIndicationMessage = null
             )
         }
     }

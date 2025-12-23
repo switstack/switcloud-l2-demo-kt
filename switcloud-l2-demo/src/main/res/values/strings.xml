@@ -7,9 +7,21 @@
     <string name="enter_your_pin">Enter your PIN</string>
     <string name="cancel">Cancel</string>
     <string name="success">Success</string>
+    <string name="declined">Declined</string>
     <string name="enter_amount">Please enter amount</string>
     <string name="present_card">Present card</string>
     <string name="loading">Loading in progress...</string>
     <string name="payment_receipt">Payment Receipt</string>
     <string name="proceed_payment">Proceed with payment</string>
+
+    <string name="error_loading_emv_config">Failed to load EMV Config</string>
+    <string name="error_loading_capks">Failed to load CAPK list</string>
+    <string name="error_timeout">Card detection timeout</string>
+    <string name="error_failure">Failure</string>
+    <string name="error_pre_processing">Pre-processing failed</string>
+    <string name="error_card_detection">Card detection error</string>
+    <string name="error_combination_selection">Combination selection failed</string>
+    <string name="error_not_ready">SwitCloudL2 is not ready</string>
+    <string name="error_user_cancelled">User cancelled</string>
+    <string name="error_init_failed">Initialization failed</string>
 </resources>
