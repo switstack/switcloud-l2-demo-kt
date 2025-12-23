@@ -246,10 +246,7 @@ fun PaymentScreenContent(amount: String,
                         text = contentValues.text,
                         color = contentValues.colorTint ?: MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Center,
-                        style = if(errorMessage != null)
-                            MaterialTheme.typography.headlineSmall
-                        else
-                            MaterialTheme.typography.headlineLarge)
+                        style = MaterialTheme.typography.headlineSmall)
 
                     contentValues.buttonText?.let { stringId ->
                         Action(
