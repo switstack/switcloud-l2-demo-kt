@@ -150,7 +150,7 @@ fun PinEntryScreenContent(isLandScape: Boolean,
                             12    -> OperationButton(
                                 onClick = onCancelClick,
                                 enableCondition = { true },
-                                enabledButtonColor = MaterialTheme.colorScheme.errorContainer,
+                                enabledButtonColor = MaterialTheme.colorScheme.error,
                                 content = {
                                     Text("Cancel",
                                         autoSize = TextAutoSize.StepBased(maxFontSize = 22.sp),
@@ -173,7 +173,7 @@ fun PinEntryScreenContent(isLandScape: Boolean,
                             14   -> OperationButton(
                                 onClick = onPinValidationClick,
                                 enableCondition = { pin.length >= 4 },
-                                enabledButtonColor = MaterialTheme.colorScheme.surfaceTint,
+                                enabledButtonColor = MaterialTheme.colorScheme.tertiary,
                                 content = {
                                     Icon(
                                         modifier = Modifier.size(36.dp),
