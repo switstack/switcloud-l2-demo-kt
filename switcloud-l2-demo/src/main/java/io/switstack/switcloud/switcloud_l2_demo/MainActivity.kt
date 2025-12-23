@@ -14,10 +14,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorEnum
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorEnum.QCOM
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorEnum.STANDALONE
-import java.util.Locale.getDefault
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorModeEnum.CONNECTED
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorModeEnum.STANDALONE
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorMode
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,8 +46,8 @@ class MainActivity : AppCompatActivity() {
 @Composable
 fun MyApp(paymentViewModel: PaymentViewModel) {
     val navController = rememberNavController()
-    val startDestination = when (FlavorEnum.valueOf(BuildConfig.FLAVOR_version.uppercase(getDefault()))) {
-        QCOM -> "shopping_cart"
+    val startDestination = when (getFlavorMode()) {
+        CONNECTED -> "shopping_cart"
         STANDALONE -> "payment_entry"
     }
 

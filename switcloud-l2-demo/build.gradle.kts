@@ -44,17 +44,40 @@ android {
         noCompress.add("mbn")
     }
 
-    flavorDimensions += "version"
+    flavorDimensions += "mode"
+    flavorDimensions += "target"
     flavorDimensions += "l2"
 
     productFlavors {
-        create("qcom") {
-            dimension = "version"
+        create("qualcomm") {
+            dimension = "target"
             applicationIdSuffix = ".qcom"
             versionNameSuffix = "-qcom"
+            resValue("string", "app_name", "Switcloud L2 Demo Qualcomm")
+        }
+        create("sunmi") {
+            dimension = "target"
+            applicationIdSuffix = ".sunmi"
+            versionNameSuffix = "-sunmi"
+            resValue("string", "app_name", "Switcloud L2 Demo Sunmi")
+        }
+        create("flytech") {
+            dimension = "target"
+            applicationIdSuffix = ".flytech"
+            versionNameSuffix = "-flytech"
+            resValue("string", "app_name", "Switcloud L2 Demo Flytech")
+        }
+        create("newland") {
+            dimension = "target"
+            applicationIdSuffix = ".newland"
+            versionNameSuffix = "-newland"
+            resValue("string", "app_name", "Switcloud L2 Demo Newland")
         }
         create("standalone") {
-            dimension = "version"
+            dimension = "mode"
+        }
+        create("connected") {
+            dimension = "mode"
         }
         create("mokastd") {
             dimension = "l2"

@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -222,7 +223,9 @@ fun PaymentScreenContent(amount: String,
                 }
 
                 Column(modifier = Modifier.weight(0.5f),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
+                    ) {
                     Text(modifier = Modifier.padding(bottom = 16.dp),
                         text = contentValues.text,
                         color = contentValues.colorTint ?: MaterialTheme.colorScheme.onSurface,
@@ -232,18 +235,14 @@ fun PaymentScreenContent(amount: String,
                         else
                             MaterialTheme.typography.headlineLarge)
 
-                    Box(modifier = Modifier.weight(1f),
-                        contentAlignment = Alignment.Center) {
-                        contentValues.buttonText?.let { stringId ->
-                            Action(
-                                modifier = Modifier.padding(top = 16.dp),
-                                buttonText = stringResource(stringId),
-                                buttonType = ButtonType.Elevated,
-                                onClick = when(stringId) {
-                                    R.string.cancel -> onCancelClick
-                                    else -> onBackToPreviousClick
-                                })
-                        }
+                    contentValues.buttonText?.let { stringId ->
+                        Action(
+                            buttonText = stringResource(stringId),
+                            buttonType = ButtonType.Elevated,
+                            onClick = when(stringId) {
+                                R.string.cancel -> onCancelClick
+                                else -> onBackToPreviousClick
+                            })
                     }
                     Footer()
                 }
