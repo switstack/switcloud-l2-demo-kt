@@ -258,7 +258,7 @@ fun PaymentScreenContent(amount: String,
                             Text(
                                 modifier = Modifier.padding(bottom = 16.dp),
                                 text = contentValues.text,
-                                color = contentValues.colorTint ?: MaterialTheme.colorScheme.onSurface,
+                                color =  contentValues.colorTint.takeIf { it != Color.Transparent } ?: MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.headlineSmall)
 
