@@ -56,6 +56,7 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getTagL
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getValueLabel
 import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
+import io.switstack.switcloud.switcloud_l2_demo.utils.isCompactDevice
 import kotlin.random.Random
 
 @Composable

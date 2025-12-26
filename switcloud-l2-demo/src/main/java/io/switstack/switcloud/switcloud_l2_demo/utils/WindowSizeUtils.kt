@@ -1,4 +1,4 @@
-package io.switstack.switcloud.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo.utils
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable

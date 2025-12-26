@@ -3,7 +3,7 @@ import android.content.pm.ActivityInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import io.switstack.switcloud.switcloud_l2_demo.isCompactDevice
+import io.switstack.switcloud.switcloud_l2_demo.utils.isCompactDevice
 
 @Composable
 fun LockScreenOrientation() {
