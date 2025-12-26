@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -61,7 +62,17 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 
     val amountFormatted = AmountUtils.toUsdTwoDecimalString(amount)
 
+    val modelEnum = try {
+        NfcAntennaDeviceEnum.valueOf("${Build.BRAND.uppercase()}_${Build.PRODUCT.uppercase()}")
+//        NfcAntennaDeviceEnum.INEFI_ANDROID_G17
+//        NfcAntennaDeviceEnum.PEPPERL_FUCHS_TABIND10AND
+    } catch (e: Exception) {
+        println(e)
+        null
+    }
+
     PaymentScreenContent(amountFormatted,
+        modelEnum,
         uiState.initialized,
         uiState.success,
         uiState.declinedOpsStatusAndErrorIndicationMessage ?: uiState.errorMessageResource?.let { stringResource(it) },
@@ -96,6 +107,7 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 
 @Composable
 fun PaymentScreenContent(amount: String,
+                         deviceModelEnum: NfcAntennaDeviceEnum?,
                          ready: Boolean,
                          success: Boolean?,
                          errorMessage: String?,
@@ -123,15 +135,6 @@ fun PaymentScreenContent(amount: String,
             0.32f,
             MaterialTheme.typography.displaySmall
         )
-    }
-
-    val modelEnum = try {
-        NfcAntennaDeviceEnum.valueOf("${Build.BRAND.uppercase()}_${Build.PRODUCT.uppercase()}")
-        //NfcAntennaDeviceEnum.INEFI_ANDROID_G17
-        //NfcAntennaDeviceEnum.PEPPERL_FUCHS_TABIND10AND
-    } catch (e: Exception) {
-        println(e)
-        null
     }
 
     val contentValues = when {
@@ -178,12 +181,12 @@ fun PaymentScreenContent(amount: String,
                 ImageConfig(R.drawable.ic_contactless, 200.dp, "EMVCo contactless logo"),
                 stringResource(R.string.present_card),
                 R.string.cancel,
-                null
+                Color.Transparent.takeIf { deviceModelEnum == null }
             )
         }
     }
 
-    Surface() {
+    Surface {
         Image(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillHeight,
@@ -191,15 +194,6 @@ fun PaymentScreenContent(amount: String,
             contentDescription = "Payment background")
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 
-            Column {
-                Spacer(modifier = Modifier.fillMaxHeight(config.headerPercent))
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(shape = RoundedCornerShape(48.dp, 48.dp, 0.dp, 0.dp))
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
-                )
-            }
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -219,45 +213,67 @@ fun PaymentScreenContent(amount: String,
                     )
                 }
             }
-
-            Column(modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                Spacer(modifier = Modifier.weight(0.5f))
-                Box(modifier = Modifier.size(200.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    contentValues.imageConfig?.let { imageConfig ->
-                        Image(
-                            modifier = Modifier.sizeIn(maxWidth = imageConfig.width),
-                            painter = painterResource(id = imageConfig.drawable),
-                            contentDescription = imageConfig.contentDescription,
-                            colorFilter = ColorFilter.tint(contentValues.colorTint ?: MaterialTheme.colorScheme.onBackground)
-                        )
-                    } ?: run {
-                        CircularProgressIndicator(modifier = Modifier.size(75.dp))
-                    }
+            Row {
+                if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+                    && deviceModelEnum == NfcAntennaDeviceEnum.INEFI_ANDROID_G17) {
+                    Box(Modifier.weight(1f)) { }
                 }
+                Box(Modifier.weight(1f)) {
 
-                Column(modifier = Modifier.weight(0.5f),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween
-                    ) {
-                    Text(modifier = Modifier.padding(bottom = 16.dp),
-                        text = contentValues.text,
-                        color = contentValues.colorTint ?: MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.headlineSmall)
-
-                    contentValues.buttonText?.let { stringId ->
-                        Action(
-                            buttonText = stringResource(stringId),
-                            buttonType = ButtonType.Elevated,
-                            onClick = when(stringId) {
-                                R.string.cancel -> onCancelClick
-                                else -> onBackToPreviousClick
-                            })
+                    Column {
+                        Spacer(modifier = Modifier.fillMaxHeight(config.headerPercent))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(shape = RoundedCornerShape(48.dp, 48.dp, 0.dp, 0.dp))
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                        )
                     }
-                    Footer()
+
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        Spacer(modifier = Modifier.weight(0.5f))
+                        Box(
+                            modifier = Modifier.size(200.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            contentValues.imageConfig?.let { imageConfig ->
+                                Image(
+                                    modifier = Modifier.sizeIn(maxWidth = imageConfig.width),
+                                    painter = painterResource(id = imageConfig.drawable),
+                                    contentDescription = imageConfig.contentDescription,
+                                    colorFilter = ColorFilter.tint(contentValues.colorTint ?: MaterialTheme.colorScheme.onBackground)
+                                )
+                            } ?: run {
+                                CircularProgressIndicator(modifier = Modifier.size(75.dp))
+                            }
+                        }
+
+                        Column(
+                            modifier = Modifier.weight(0.5f),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(bottom = 16.dp),
+                                text = contentValues.text,
+                                color = contentValues.colorTint ?: MaterialTheme.colorScheme.onSurface,
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.headlineSmall)
+
+                            contentValues.buttonText?.let { stringId ->
+                                Action(
+                                    buttonText = stringResource(stringId),
+                                    buttonType = ButtonType.Elevated,
+                                    onClick = when (stringId) {
+                                        R.string.cancel -> onCancelClick
+                                        else            -> onBackToPreviousClick
+                                    })
+                            }
+                            Footer()
+                        }
+                    }
                 }
             }
         }
@@ -296,6 +312,22 @@ fun PaymentScreenContent(amount: String,
 fun PaymentScreenLoadingPreview() {
     Switcloudl2demoktTheme {
         PaymentScreenContent("1000",
+            NfcAntennaDeviceEnum.PEPPERL_FUCHS_TABIND10AND,
+                             false,
+                             false,
+                             null,
+                             { },
+                             { })
+    }
+}
+
+@Preview(device = TABLET)
+@Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun PaymentScreenLoadingFlytechPreview() {
+    Switcloudl2demoktTheme {
+        PaymentScreenContent("1000",
+            NfcAntennaDeviceEnum.INEFI_ANDROID_G17,
                              false,
                              false,
                              null,
@@ -314,6 +346,7 @@ fun PaymentScreenLoadingPreview() {
 fun PaymentScreenReadyPreview() {
     Switcloudl2demoktTheme {
         PaymentScreenContent("1000",
+            NfcAntennaDeviceEnum.PEPPERL_FUCHS_TABIND10AND,
                              true,
                              false,
                              null,
@@ -328,6 +361,7 @@ fun PaymentScreenReadyPreview() {
 fun PaymentScreenSuccessPreview() {
     Switcloudl2demoktTheme {
         PaymentScreenContent("1000",
+            NfcAntennaDeviceEnum.PEPPERL_FUCHS_TABIND10AND,
                              true,
                              true,
                              null,
@@ -342,6 +376,7 @@ fun PaymentScreenSuccessPreview() {
 fun PaymentScreenErrorPreview() {
     Switcloudl2demoktTheme {
         PaymentScreenContent("1000",
+            NfcAntennaDeviceEnum.PEPPERL_FUCHS_TABIND10AND,
                              true,
                              false,
                              "Error",
