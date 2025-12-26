@@ -14,3 +14,51 @@ kls_database.db
 docs/api
 site
 venv
+
+# ===============================================
+# Android Studio & Gradle Build Artifacts
+# ===============================================
+
+# Generated files and folders from building the project
+/build
+/app/build
+/switcloud-l2-demo/build
+
+# Generated APKs, AABs, and other build outputs
+*.apk
+*.aab
+*.ap_
+*.apks
+*.jar
+*.war
+*.ear
+*.dm
+
+# Build metadata
+output-metadata.json
+signing-config.json
+
+# Local configuration files (should not be shared)
+local.properties
+.gradle/
+c.gradle/
+/captures/
+
+# IDE-specific files
+.idea/
+.idea/workspace.xml
+.idea/libraries/
+*.iml
+*.ipr
+*.iws
+
+# Log files
+*.log
+
+# Keystore files (NEVER commit these)
+*.jks
+*.keystore
+
+# Lint results
+lint-results-*.xml
+lint-results-*.html

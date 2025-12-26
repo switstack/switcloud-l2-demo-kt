@@ -23,7 +23,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -81,6 +82,21 @@ android {
         }
         create("mokastd") {
             dimension = "l2"
+        }
+    }
+
+    androidComponents {
+        beforeVariants { variantBuilder ->
+            val mode = variantBuilder.productFlavors.find { it.first == "mode" }?.second
+            val target = variantBuilder.productFlavors.find { it.first == "target" }?.second
+
+            val isConnectedFlytech = (mode == "connected" && target == "flytech")
+            val isConnectedSunmi = (mode == "connected" && target == "sunmi")
+            val isConnectedNewland = (mode == "connected" && target == "newland")
+
+            if (isConnectedFlytech || isConnectedSunmi || isConnectedNewland) {
+                variantBuilder.enable = false
+            }
         }
     }
 
