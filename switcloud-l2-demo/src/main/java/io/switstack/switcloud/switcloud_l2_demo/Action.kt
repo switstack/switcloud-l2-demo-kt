@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -51,30 +52,35 @@ fun Action(modifier: Modifier = Modifier, buttonText: String, buttonType: Button
             modifier = buttonModifier,
             colors = buttonColors ?: ButtonDefaults.elevatedButtonColors().copy(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
             onClick = onClick,
+            shape = RoundedCornerShape(8.dp),
             content = text)
 
         ButtonType.Filled -> Button(
             modifier = buttonModifier,
             colors = buttonColors ?: ButtonDefaults.buttonColors(),
             onClick = onClick,
+            shape = RoundedCornerShape(8.dp),
             content = text)
 
         ButtonType.Outlined -> OutlinedButton(
             modifier = buttonModifier,
             colors = buttonColors ?: ButtonDefaults.outlinedButtonColors(),
             onClick = onClick,
+            shape = RoundedCornerShape(8.dp),
             content = text)
 
         ButtonType.Text -> TextButton(
             modifier = buttonModifier,
             colors = buttonColors ?: ButtonDefaults.textButtonColors(),
             onClick = onClick,
+            shape = RoundedCornerShape(8.dp),
             content = text)
 
         ButtonType.Tonal -> FilledTonalButton(
             modifier = buttonModifier,
             colors = buttonColors ?: ButtonDefaults.filledTonalButtonColors(),
             onClick = onClick,
+            shape = RoundedCornerShape(8.dp),
             content = text)
     }
 
