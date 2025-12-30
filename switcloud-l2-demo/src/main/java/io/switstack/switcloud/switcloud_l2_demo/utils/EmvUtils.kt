@@ -22,9 +22,13 @@ class EmvUtils {
                         else -> "Unknown"
                     }
                 }
+
+                EmvTagEnum.TAG_5F20,
                 EmvTagEnum.TAG_50     -> ByteArrayHexStringUtils.hexStringToAsciiString(value)
+
                 EmvTagEnum.TAG_DF8129,
                 EmvTagEnum.TAG_9F8210 -> getOPSVerdictLabel(value)
+                
                 else                  -> value
             }
         }
