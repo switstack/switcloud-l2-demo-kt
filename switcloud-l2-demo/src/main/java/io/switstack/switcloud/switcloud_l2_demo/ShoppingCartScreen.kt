@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -96,9 +95,9 @@ fun ShoppingCartScreen(
                     Surface(
                         modifier = Modifier
                             .padding(horizontal = 16.dp, vertical = 32.dp)
-                            .shadow(16.dp, clip = false)
                             .widthIn(max = 500.dp),
-                        color = md_theme_light_surface
+                        color = md_theme_light_surface,
+                        shape = RoundedCornerShape(16.dp)
                     ) {
 
                         Column(

@@ -21,6 +21,9 @@ import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -129,8 +132,12 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                                 modifier = Modifier.widthIn(max = 200.dp),
                                 state = customAmount,
                                 shape = RoundedCornerShape(8.dp),
+                                leadingIcon = {
+                                    Icon(imageVector = Icons.Filled.AttachMoney,
+                                        contentDescription = "Currency Symbol")
+                                },
                                 lineLimits = TextFieldLineLimits.SingleLine,
-                                label = { Text("Custom amount", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                                placeholder = { Text("Custom amount", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                                 keyboardOptions = KeyboardOptions.Default.copy(
                                     keyboardType = KeyboardType.Number,
                                     imeAction = ImeAction.Done

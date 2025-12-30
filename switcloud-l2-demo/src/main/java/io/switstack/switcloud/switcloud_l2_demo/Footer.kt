@@ -3,7 +3,6 @@ package io.switstack.switcloud.switcloud_l2_demo
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -39,7 +38,7 @@ fun Footer(modifier: Modifier = Modifier) {
         Image(
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 10.dp),
+                .padding(start = 5.dp, end = 10.dp),
             painter = painterResource(id = when(getFlavorTarget()) {
                 FlavorTargetEnum.QUALCOMM -> R.drawable.ic_dragonwing
                 FlavorTargetEnum.SUNMI    -> R.drawable.ic_sunmi
@@ -82,7 +81,7 @@ fun Footer(modifier: Modifier = Modifier) {
                  Image(
                      modifier = Modifier
                          .weight(1f)
-                         .padding(start = 10.dp),
+                         .padding(start = 10.dp, end = 5.dp),
                     painter = painterResource(id = R.drawable.ic_oona),
                     contentDescription = "Oona Logo",
                     contentScale = ContentScale.Fit
@@ -92,7 +91,7 @@ fun Footer(modifier: Modifier = Modifier) {
                 Image(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 10.dp),
+                        .padding(start = 10.dp, end = 5.dp),
                     painter = painterResource(id = R.drawable.ic_dragonwing),
                     contentDescription = "Qualcomm Logo",
                     contentScale = if (isLandscape) ContentScale.FillHeight else ContentScale.FillWidth,
