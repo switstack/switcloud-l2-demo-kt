@@ -23,6 +23,7 @@ venv
 /build
 /app/build
 /switcloud-l2-demo/build
+/switcloud-l2-demo/reports
 
 # Generated APKs, AABs, and other build outputs
 *.apk
