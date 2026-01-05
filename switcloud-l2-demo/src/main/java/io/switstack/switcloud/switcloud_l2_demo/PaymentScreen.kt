@@ -1,7 +1,6 @@
 package io.switstack.switcloud.switcloud_l2_demo
 
 import android.content.res.Configuration
-import android.os.Build
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,13 +40,16 @@ import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.switstack.switcloud.switcloud_l2_demo.data.NfcAntennaDeviceEnum
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues.ImageConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.AmountUtils
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum.FLYTECH
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum.QUALCOMM
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 import kotlinx.coroutines.delay
 
 @Composable
@@ -62,17 +64,8 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 
     val amountFormatted = AmountUtils.toUsdTwoDecimalString(amount)
 
-    val modelEnum = try {
-        NfcAntennaDeviceEnum.valueOf("${Build.BRAND.uppercase()}_${Build.PRODUCT.uppercase()}")
-//        NfcAntennaDeviceEnum.INEFI_ANDROID_G17
-//        NfcAntennaDeviceEnum.PEPPERL_FUCHS_TABIND10AND
-    } catch (e: Exception) {
-        println(e)
-        null
-    }
-
     PaymentScreenContent(amountFormatted,
-        modelEnum,
+        getFlavorTarget(),
         uiState.initialized,
         uiState.success,
         uiState.declinedOpsStatusAndErrorIndicationMessage ?: uiState.errorMessageResource?.let { stringResource(it) },
@@ -107,7 +100,7 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 
 @Composable
 fun PaymentScreenContent(amount: String,
-                         deviceModelEnum: NfcAntennaDeviceEnum?,
+                         flavorTarget: FlavorTargetEnum?,
                          ready: Boolean,
                          success: Boolean?,
                          errorMessage: String?,
@@ -178,10 +171,13 @@ fun PaymentScreenContent(amount: String,
         }
         else -> {
             PaymentDisplayedStateValues(
-                ImageConfig(R.drawable.ic_contactless, 200.dp, "EMVCo contactless logo"),
+                when(flavorTarget) {
+                    null -> ImageConfig(R.drawable.ic_payment_placeholder, 200.dp, "Tap placeholder")
+                    else -> ImageConfig(R.drawable.ic_contactless, 200.dp, "EMVCo contactless logo")
+                },
                 stringResource(R.string.present_card),
                 R.string.cancel,
-                Color.Transparent.takeIf { deviceModelEnum == null }
+                MaterialTheme.colorScheme.onBackground.takeIf { flavorTarget != null }
             )
         }
     }
@@ -215,7 +211,7 @@ fun PaymentScreenContent(amount: String,
             }
             Row {
                 if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-                    && deviceModelEnum == NfcAntennaDeviceEnum.INEFI_ANDROID_G17) {
+                    && flavorTarget == FLYTECH) {
                     Box(Modifier.weight(1f)) { }
                 }
                 Box(Modifier.weight(1f)) {
@@ -243,7 +239,7 @@ fun PaymentScreenContent(amount: String,
                                     modifier = Modifier.sizeIn(maxWidth = imageConfig.width),
                                     painter = painterResource(id = imageConfig.drawable),
                                     contentDescription = imageConfig.contentDescription,
-                                    colorFilter = ColorFilter.tint(contentValues.colorTint ?: MaterialTheme.colorScheme.onBackground)
+                                    colorFilter = contentValues.colorTint?.let { ColorFilter.tint(it) }
                                 )
                             } ?: run {
                                 CircularProgressIndicator(modifier = Modifier.size(75.dp))
@@ -258,7 +254,7 @@ fun PaymentScreenContent(amount: String,
                             Text(
                                 modifier = Modifier.padding(bottom = 16.dp),
                                 text = contentValues.text,
-                                color =  contentValues.colorTint.takeIf { it != Color.Transparent } ?: MaterialTheme.colorScheme.onSurface,
+                                color =  contentValues.colorTint ?: MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.headlineSmall)
 
@@ -312,9 +308,9 @@ fun PaymentScreenContent(amount: String,
 fun PaymentScreenLoadingPreview() {
     Switcloudl2demoktTheme {
         PaymentScreenContent("1000",
-            NfcAntennaDeviceEnum.PEPPERL_FUCHS_TABIND10AND,
+                             QUALCOMM,
                              false,
-                             false,
+                             null,
                              null,
                              { },
                              { })
@@ -327,9 +323,9 @@ fun PaymentScreenLoadingPreview() {
 fun PaymentScreenLoadingFlytechPreview() {
     Switcloudl2demoktTheme {
         PaymentScreenContent("1000",
-            NfcAntennaDeviceEnum.INEFI_ANDROID_G17,
+                             FLYTECH,
                              false,
-                             false,
+                             null,
                              null,
                              { },
                              { })
@@ -346,9 +342,9 @@ fun PaymentScreenLoadingFlytechPreview() {
 fun PaymentScreenReadyPreview() {
     Switcloudl2demoktTheme {
         PaymentScreenContent("1000",
-            NfcAntennaDeviceEnum.PEPPERL_FUCHS_TABIND10AND,
+                             null,
                              true,
-                             false,
+                             null,
                              null,
                              { },
                              { })
@@ -361,7 +357,7 @@ fun PaymentScreenReadyPreview() {
 fun PaymentScreenSuccessPreview() {
     Switcloudl2demoktTheme {
         PaymentScreenContent("1000",
-            NfcAntennaDeviceEnum.PEPPERL_FUCHS_TABIND10AND,
+                             QUALCOMM,
                              true,
                              true,
                              null,
@@ -376,7 +372,7 @@ fun PaymentScreenSuccessPreview() {
 fun PaymentScreenErrorPreview() {
     Switcloudl2demoktTheme {
         PaymentScreenContent("1000",
-            NfcAntennaDeviceEnum.PEPPERL_FUCHS_TABIND10AND,
+                             QUALCOMM,
                              true,
                              false,
                              "Error",
