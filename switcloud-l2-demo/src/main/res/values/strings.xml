@@ -9,6 +9,7 @@
     <string name="success">Success</string>
     <string name="declined">Declined</string>
     <string name="enter_amount">Please enter amount</string>
+    <string name="select_amount">Please select amount</string>
     <string name="present_card">Present card</string>
     <string name="loading">Loading in progress...</string>
     <string name="payment_receipt">Payment Receipt</string>

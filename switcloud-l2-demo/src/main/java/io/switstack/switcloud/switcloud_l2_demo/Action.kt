@@ -97,7 +97,8 @@ fun RoundAction(modifier: Modifier = Modifier,
             buttonText,
             textAlign = TextAlign.Center,
             maxLines = 1,
-            autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.bodyLarge.fontSize))
+            autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.headlineSmall.fontSize),
+            style = MaterialTheme.typography.headlineSmall)
     }
 
     when (buttonType) {

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.foundation.text.input.TextFieldLineLimits
@@ -40,14 +41,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices.PHONE
-import androidx.compose.ui.tooling.preview.Devices.TABLET
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
+import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.isCompactDevice
+import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallSquareScreen
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -55,11 +55,12 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
     val customAmount = rememberTextFieldState()
     val keyboardVisible = WindowInsets.isImeVisible
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isSmallSquareScreen = isSmallSquareScreen()
 
-    val config = if (isLandscape) {
-        PaymentDisplayConfig(R.drawable.bg_payment_land, 0.27f, MaterialTheme.typography.displayLarge)
-    } else {
-        PaymentDisplayConfig(R.drawable.bg_payment_port, 0.32f, MaterialTheme.typography.displaySmall)
+    val config = when {
+        isSmallSquareScreen -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.15f, MaterialTheme.typography.displayLarge)
+        isLandscape         -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.27f, MaterialTheme.typography.displayLarge)
+        else                -> PaymentDisplayConfig(R.drawable.bg_payment_port, 0.32f, MaterialTheme.typography.displaySmall)
     }
 
     Surface {
@@ -78,8 +79,9 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.Center),
-                    text = stringResource(R.string.enter_amount),
+                    text = stringResource(if(isSmallSquareScreen) R.string.select_amount else R.string.enter_amount),
                     color = MaterialTheme.colorScheme.onPrimary,
+                    autoSize = TextAutoSize.StepBased(maxFontSize = config.headerTextStyle.fontSize),
                     style = config.headerTextStyle)
             }
             Column(
@@ -103,24 +105,24 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                             ) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
                                     RoundAction(
-                                        buttonText = "$5.00",
+                                        buttonText = "$5",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text -> onProceedPaymentClick(text) }
                                     )
                                     RoundAction(
-                                        buttonText = "$25.00",
+                                        buttonText = "$25",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text -> onProceedPaymentClick(text) }
                                     )
                                 }
                                 Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
                                     RoundAction(
-                                        buttonText = "$50.00",
+                                        buttonText = "$50",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text -> onProceedPaymentClick(text) }
                                     )
                                     RoundAction(
-                                        buttonText = "$100.00",
+                                        buttonText = "$100",
                                         buttonType = ButtonType.Elevated,
                                         onClick = { text -> onProceedPaymentClick(text) }
                                     )
@@ -128,31 +130,33 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                             }
                         },
                         item2 = {
-                            TextField(
-                                modifier = Modifier.widthIn(max = 200.dp),
-                                state = customAmount,
-                                shape = RoundedCornerShape(8.dp),
-                                leadingIcon = {
-                                    Icon(imageVector = Icons.Filled.AttachMoney,
-                                        contentDescription = "Currency Symbol")
-                                },
-                                lineLimits = TextFieldLineLimits.SingleLine,
-                                placeholder = { Text("Custom amount", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
-                                keyboardOptions = KeyboardOptions.Default.copy(
-                                    keyboardType = KeyboardType.Number,
-                                    imeAction = ImeAction.Done
-                                ),
-                                inputTransformation = DigitOnlyInputTransformation(),
-                                onKeyboardAction = {
-                                    customAmount.text.takeIf { it.isNotBlank() }?.let {
-                                        onProceedPaymentClick("$it.00")
-                                    }
-                                },
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                            if(!isSmallSquareScreen) {
+                                TextField(
+                                    modifier = Modifier.widthIn(max = 200.dp),
+                                    state = customAmount,
+                                    shape = RoundedCornerShape(8.dp),
+                                    leadingIcon = {
+                                        Icon(imageVector = Icons.Filled.AttachMoney,
+                                            contentDescription = "Currency Symbol")
+                                    },
+                                    lineLimits = TextFieldLineLimits.SingleLine,
+                                    placeholder = { Text("Custom amount", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                                    keyboardOptions = KeyboardOptions.Default.copy(
+                                        keyboardType = KeyboardType.Number,
+                                        imeAction = ImeAction.Done
+                                    ),
+                                    inputTransformation = DigitOnlyInputTransformation(),
+                                    onKeyboardAction = {
+                                        customAmount.text.takeIf { it.isNotBlank() }?.let {
+                                            onProceedPaymentClick(it.toString())
+                                        }
+                                    },
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
+                                    )
                                 )
-                            )
+                            }
                         },
                         isLandscape
                     )
@@ -210,9 +214,7 @@ class DigitOnlyInputTransformation : InputTransformation {
     }
 }
 
-
-@Preview(device = TABLET)
-@Preview(device = PHONE)
+@TabletPhonePreviews
 @Composable
 fun AmountEntryScreenPreview() {
     Switcloudl2demoktTheme() {
