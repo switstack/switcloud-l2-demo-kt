@@ -12,3 +12,8 @@ fun isCompactDevice(): Boolean {
     // A screen width of less than 600dp is generally considered a phone in portrait.
     return configuration.screenWidthDp.dp < 600.dp
 }
+
+@Composable
+fun isSmallSquareScreen() = with(LocalConfiguration.current) {
+    screenWidthDp.dp == screenHeightDp.dp && screenHeightDp == 480
+}

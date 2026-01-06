@@ -36,10 +36,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Devices.PIXEL_3
-import androidx.compose.ui.tooling.preview.Devices.PIXEL_7
-import androidx.compose.ui.tooling.preview.Devices.TABLET
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum
@@ -47,6 +43,7 @@ import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum.Companion.fromTa
 import io.switstack.switcloud.switcloud_l2_demo.data.OPSVerdictEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
+import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_onSurface
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_surface
@@ -57,6 +54,7 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getValu
 import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.isCompactDevice
+import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallSquareScreen
 import kotlin.random.Random
 
 @Composable
@@ -79,11 +77,12 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                                transactionCounter: Int,
                                onBackToPreviousClick: () -> Unit
 ) {
-
-    val config = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        PaymentDisplayConfig(R.drawable.bg_payment_land, 0.10f, MaterialTheme.typography.displayLarge)
-    } else {
-        PaymentDisplayConfig(R.drawable.bg_payment_port, 0.12f, MaterialTheme.typography.displaySmall)
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isSmallSquareScreen = isSmallSquareScreen()
+    val config = when {
+        isSmallSquareScreen -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.05f, MaterialTheme.typography.displayLarge)
+        isLandscape         -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.10f, MaterialTheme.typography.displayLarge)
+        else                -> PaymentDisplayConfig(R.drawable.bg_payment_port, 0.12f, MaterialTheme.typography.displaySmall)
     }
 
     val ticketTextStyle = TextStyle(
@@ -92,7 +91,7 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
         color = md_theme_light_onSurface
     )
 
-    Surface() {
+    Surface {
         Image(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillHeight,
@@ -113,8 +112,7 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Spacer(modifier = Modifier.heightIn(max = 60.dp))
-                Column(
-                    modifier = Modifier
+                Column(modifier = Modifier.weight(1f)
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -209,13 +207,7 @@ private val sampleTlv = listOf(
     TlvEntry("DF8129", "0000000")
 )
 
-@Preview(device = PIXEL_7)
-@Preview(device = PIXEL_3)
-@Preview(device = TABLET)
-@Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(device = TABLET,
-         widthDp = 800,
-         heightDp = 1280)
+@TabletPhonePreviews
 @Composable
 fun PaymentTicketScreenSuccessPreview() {
     Switcloudl2demoktTheme {

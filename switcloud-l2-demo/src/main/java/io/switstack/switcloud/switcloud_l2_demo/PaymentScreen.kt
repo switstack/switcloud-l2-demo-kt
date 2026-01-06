@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -35,7 +36,6 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices.PHONE
 import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,12 +44,14 @@ import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues.ImageConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
+import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.AmountUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum.FLYTECH
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum.QUALCOMM
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
+import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallSquareScreen
 import kotlinx.coroutines.delay
 
 @Composable
@@ -107,8 +109,19 @@ fun PaymentScreenContent(amount: String,
                          onBackToPreviousClick: () -> Unit,
                          onCancelClick: () -> Unit
 ) {
-    val config = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        PaymentDisplayConfig(
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isSmallSquareScreen = isSmallSquareScreen()
+    val config = when {
+        isSmallSquareScreen -> PaymentDisplayConfig(
+            when {
+                errorMessage != null -> R.drawable.bg_error_land
+                success == true      -> R.drawable.bg_success_land
+                else                 -> R.drawable.bg_payment_land
+            },
+            0.15f,
+            MaterialTheme.typography.displayLarge
+        )
+        isLandscape         -> PaymentDisplayConfig(
             when {
                 errorMessage != null -> R.drawable.bg_error_land
                 success == true      -> R.drawable.bg_success_land
@@ -116,10 +129,8 @@ fun PaymentScreenContent(amount: String,
             },
             0.27f,
             MaterialTheme.typography.displayLarge
-
         )
-    } else {
-        PaymentDisplayConfig(
+        else            -> PaymentDisplayConfig(
             when {
                 errorMessage != null -> R.drawable.bg_error_port
                 success == true      -> R.drawable.bg_success_port
@@ -171,8 +182,8 @@ fun PaymentScreenContent(amount: String,
         }
         else -> {
             PaymentDisplayedStateValues(
-                when(flavorTarget) {
-                    null -> ImageConfig(R.drawable.ic_payment_placeholder, 200.dp, "Tap placeholder")
+                when {
+                    flavorTarget == null -> ImageConfig(R.drawable.ic_payment_placeholder, 200.dp, "Tap placeholder")
                     else -> ImageConfig(R.drawable.ic_contactless, 200.dp, "EMVCo contactless logo")
                 },
                 stringResource(R.string.present_card),
@@ -205,6 +216,7 @@ fun PaymentScreenContent(amount: String,
                             .align(Alignment.Center),
                         text = "$$amount",
                         color = MaterialTheme.colorScheme.onPrimary,
+                        autoSize = TextAutoSize.StepBased(maxFontSize = config.headerTextStyle.fontSize),
                         style = config.headerTextStyle
                     )
                 }
@@ -267,7 +279,9 @@ fun PaymentScreenContent(amount: String,
                                         else            -> onBackToPreviousClick
                                     })
                             }
-                            Footer()
+                            if(!isSmallSquareScreen) {
+                                Footer()
+                            }
                         }
                     }
                 }
@@ -332,12 +346,21 @@ fun PaymentScreenLoadingFlytechPreview() {
     }
 }
 
-@Preview(device = TABLET)
-@Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(device = TABLET,
-         widthDp = 800,
-         heightDp = 1280)
-@Preview(device = PHONE)
+@TabletPhonePreviews
+@Composable
+fun PaymentScreenReadyUnknownDevicePreview() {
+    Switcloudl2demoktTheme {
+        PaymentScreenContent("1000",
+                             null,
+                             true,
+                             null,
+                             null,
+                             { },
+                             { })
+    }
+}
+
+@TabletPhonePreviews
 @Composable
 fun PaymentScreenReadyPreview() {
     Switcloudl2demoktTheme {
@@ -351,7 +374,7 @@ fun PaymentScreenReadyPreview() {
     }
 }
 
-@Preview(device = TABLET)
+@TabletPhonePreviews
 @Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PaymentScreenSuccessPreview() {
@@ -366,7 +389,7 @@ fun PaymentScreenSuccessPreview() {
     }
 }
 
-@Preview(device = TABLET)
+@TabletPhonePreviews
 @Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun PaymentScreenErrorPreview() {
