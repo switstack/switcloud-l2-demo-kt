@@ -65,17 +65,19 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
         route = "payment_flow"
     ) {
         composable("shopping_cart") {
+            paymentViewModel.resetPaymentState()
             ShoppingCartScreen { total ->
                 navController.navigate("payment/$total") {
-                    popUpTo("shopping_cart") { inclusive = true }
+                    popUpTo("shopping_cart") { inclusive = false }
                 }
             }
         }
 
         composable("payment_entry") {
+            paymentViewModel.resetPaymentState()
             AmountEntryScreen() { total ->
                 navController.navigate("payment/$total") {
-                    popUpTo("payment_entry") { inclusive = true }
+                    popUpTo("payment_entry") { inclusive = false }
                 }
             }
         }
@@ -85,13 +87,12 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
             arguments = listOf(navArgument("amount") { type = NavType.StringType })
         ) { backStackEntry ->
             val amount = backStackEntry.arguments?.getString("amount") ?: "0"
-
             PaymentScreen(
                 paymentViewModel = paymentViewModel,
                 amount = amount,
                 onPinRequired = {
                     navController.navigate("pin_entry/$amount") {
-                        popUpTo("payment/$amount") { inclusive = false }
+                        popUpTo("payment/$amount") { inclusive = true }
                     }
                 },
                 onPaymentVerdict = { success, tlvStream ->
@@ -119,7 +120,12 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
 
             PinEntryScreen(
                 paymentViewModel = paymentViewModel,
-                onPinVerified = { navController.navigate("payment/$amount") }
+                onPinVerified = {
+                    navController.navigate("payment/$amount") {
+                        // Pop up to the start screen to prevent going back to payment
+                        popUpTo(startDestination) { inclusive = true }
+                    }
+                }
             )
         }
 
@@ -136,7 +142,10 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
                 success = success,
                 tlvStream = tlvStream
             ) {
-                navController.navigate(startDestination)
+                navController.navigate(startDestination) {
+                    // Pop up to the start screen to prevent going back to payment
+                    popUpTo(startDestination) { inclusive = true }
+                }
             }
         }
     }
