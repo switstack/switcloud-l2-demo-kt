@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues.ImageConfig
@@ -48,8 +49,6 @@ import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.AmountUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum.FLYTECH
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum.QUALCOMM
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallSquareScreen
 import kotlinx.coroutines.delay
@@ -66,13 +65,47 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 
     val amountFormatted = AmountUtils.toUsdTwoDecimalString(amount)
 
+    val secondaryDisplayManager = LocalSecondaryDisplayManager.current
+
+    val shouldDisplayNfcLogo = getFlavorTarget() != null
+
+    val shouldDisplayNfcOnPrimaryScreen = shouldDisplayNfcLogo && secondaryDisplayManager?.secondaryDisplayExists() == false
+
+    val isSplitScreen = getFlavorTarget() == FlavorTargetEnum.FLYTECH
+
+    val isSmallSquareScreen = isSmallSquareScreen()
+
     PaymentScreenContent(amountFormatted,
-        getFlavorTarget(),
-        uiState.initialized,
-        uiState.success,
-        uiState.declinedOpsStatusAndErrorIndicationMessage ?: uiState.errorMessageResource?.let { stringResource(it) },
-        onBackToPreviousClick,
-        onCancelClick)
+        shouldDisplayNfcLogo = shouldDisplayNfcOnPrimaryScreen,
+        shouldDisplayBackAction = true,
+        shouldDisplayFooter = !isSmallSquareScreen,
+        isSplitScreen = isSplitScreen,
+        isSmallSquareScreen = isSmallSquareScreen,
+        ready = uiState.initialized,
+        success = uiState.success,
+        errorMessage = uiState.declinedOpsStatusAndErrorIndicationMessage ?: uiState.errorMessageResource?.let { stringResource(it) },
+        onBackToPreviousClick = onBackToPreviousClick,
+        onCancelClick = onCancelClick)
+
+    if (getFlavorTarget() == FlavorTargetEnum.SUNMI) {
+        LaunchedEffect(Unit) {
+            secondaryDisplayManager?.show {
+                PaymentScreenContent(
+                    amountFormatted,
+                    shouldDisplayNfcLogo = !shouldDisplayNfcOnPrimaryScreen,
+                    shouldDisplayBackAction = false,
+                    shouldDisplayFooter = false,
+                    isSplitScreen = false,
+                    isSmallSquareScreen = true,
+                    ready = uiState.initialized,
+                    success = uiState.success,
+                    errorMessage = uiState.declinedOpsStatusAndErrorIndicationMessage ?: uiState.errorMessageResource?.let { stringResource(it) },
+                    onBackToPreviousClick = onBackToPreviousClick,
+                    onCancelClick = onCancelClick
+                )
+            }
+        }
+    }
 
     LaunchedEffect(uiState.initialized) {
         if (uiState.initialized
@@ -102,7 +135,11 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 
 @Composable
 fun PaymentScreenContent(amount: String,
-                         flavorTarget: FlavorTargetEnum?,
+                         shouldDisplayNfcLogo: Boolean,
+                         shouldDisplayBackAction: Boolean,
+                         shouldDisplayFooter: Boolean,
+                         isSplitScreen: Boolean,
+                         isSmallSquareScreen: Boolean,
                          ready: Boolean,
                          success: Boolean?,
                          errorMessage: String?,
@@ -110,7 +147,7 @@ fun PaymentScreenContent(amount: String,
                          onCancelClick: () -> Unit
 ) {
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val isSmallSquareScreen = isSmallSquareScreen()
+
     val config = when {
         isSmallSquareScreen -> PaymentDisplayConfig(
             when {
@@ -130,7 +167,7 @@ fun PaymentScreenContent(amount: String,
             0.27f,
             MaterialTheme.typography.displayLarge
         )
-        else            -> PaymentDisplayConfig(
+        else                -> PaymentDisplayConfig(
             when {
                 errorMessage != null -> R.drawable.bg_error_port
                 success == true      -> R.drawable.bg_success_port
@@ -140,7 +177,6 @@ fun PaymentScreenContent(amount: String,
             MaterialTheme.typography.displaySmall
         )
     }
-
     val contentValues = when {
         errorMessage != null || success == false -> {
             val displayedMessage = errorMessage ?: stringResource(R.string.declined)
@@ -183,12 +219,12 @@ fun PaymentScreenContent(amount: String,
         else -> {
             PaymentDisplayedStateValues(
                 when {
-                    flavorTarget == null -> ImageConfig(R.drawable.ic_payment_placeholder, 200.dp, "Tap placeholder")
-                    else -> ImageConfig(R.drawable.ic_contactless, 200.dp, "EMVCo contactless logo")
+                    shouldDisplayNfcLogo -> ImageConfig(R.drawable.ic_contactless, 200.dp, "EMVCo contactless logo")
+                    else -> ImageConfig(R.drawable.ic_payment_placeholder, 200.dp, "Tap placeholder")
                 },
                 stringResource(R.string.present_card),
                 R.string.cancel,
-                MaterialTheme.colorScheme.onBackground.takeIf { flavorTarget != null }
+                MaterialTheme.colorScheme.onBackground.takeIf { shouldDisplayNfcLogo }
             )
         }
     }
@@ -222,8 +258,7 @@ fun PaymentScreenContent(amount: String,
                 }
             }
             Row {
-                if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-                    && flavorTarget == FLYTECH) {
+                if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE && isSplitScreen) {
                     Box(Modifier.weight(1f)) { }
                 }
                 Box(Modifier.weight(1f)) {
@@ -270,16 +305,19 @@ fun PaymentScreenContent(amount: String,
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.headlineSmall)
 
+
                             contentValues.buttonText?.let { stringId ->
-                                Action(
-                                    buttonText = stringResource(stringId),
-                                    buttonType = ButtonType.Elevated,
-                                    onClick = when (stringId) {
-                                        R.string.cancel -> onCancelClick
-                                        else            -> onBackToPreviousClick
-                                    })
+                                if(shouldDisplayBackAction || stringId == R.string.cancel) {
+                                    Action(
+                                        buttonText = stringResource(stringId),
+                                        buttonType = ButtonType.Elevated,
+                                        onClick = when (stringId) {
+                                            R.string.cancel -> onCancelClick
+                                            else            -> onBackToPreviousClick
+                                        })
+                                }
                             }
-                            if(!isSmallSquareScreen) {
+                            if(shouldDisplayFooter) {
                                 Footer()
                             }
                         }
@@ -321,13 +359,18 @@ fun PaymentScreenContent(amount: String,
 @Composable
 fun PaymentScreenLoadingPreview() {
     Switcloudl2demoktTheme {
-        PaymentScreenContent("1000",
-                             QUALCOMM,
-                             false,
-                             null,
-                             null,
-                             { },
-                             { })
+        PaymentScreenContent(
+            "1000",
+            shouldDisplayNfcLogo = true,
+            shouldDisplayBackAction = true,
+            shouldDisplayFooter = true,
+            isSplitScreen = false,
+            isSmallSquareScreen = false,
+            ready = false,
+            success = null,
+            errorMessage = null,
+            onBackToPreviousClick = { },
+            onCancelClick = { })
     }
 }
 
@@ -336,13 +379,18 @@ fun PaymentScreenLoadingPreview() {
 @Composable
 fun PaymentScreenLoadingFlytechPreview() {
     Switcloudl2demoktTheme {
-        PaymentScreenContent("1000",
-                             FLYTECH,
-                             false,
-                             null,
-                             null,
-                             { },
-                             { })
+        PaymentScreenContent(
+            "1000",
+            shouldDisplayNfcLogo = true,
+            shouldDisplayBackAction = true,
+            shouldDisplayFooter = true,
+            isSplitScreen = true,
+            isSmallSquareScreen = false,
+            ready = false,
+            success = null,
+            errorMessage = null,
+            onBackToPreviousClick = { },
+            onCancelClick = { })
     }
 }
 
@@ -350,13 +398,18 @@ fun PaymentScreenLoadingFlytechPreview() {
 @Composable
 fun PaymentScreenReadyUnknownDevicePreview() {
     Switcloudl2demoktTheme {
-        PaymentScreenContent("1000",
-                             null,
-                             true,
-                             null,
-                             null,
-                             { },
-                             { })
+        PaymentScreenContent(
+            "1000",
+            shouldDisplayNfcLogo = false,
+            shouldDisplayBackAction = true,
+            shouldDisplayFooter = true,
+            isSplitScreen = false,
+            isSmallSquareScreen = false,
+            ready = true,
+            success = null,
+            errorMessage = null,
+            onBackToPreviousClick = { },
+            onCancelClick = { })
     }
 }
 
@@ -364,13 +417,18 @@ fun PaymentScreenReadyUnknownDevicePreview() {
 @Composable
 fun PaymentScreenReadyPreview() {
     Switcloudl2demoktTheme {
-        PaymentScreenContent("1000",
-                             null,
-                             true,
-                             null,
-                             null,
-                             { },
-                             { })
+        PaymentScreenContent(
+            "1000",
+            shouldDisplayNfcLogo = true,
+            shouldDisplayBackAction = true,
+            shouldDisplayFooter = true,
+            isSplitScreen = true,
+            isSmallSquareScreen = false,
+            ready = true,
+            success = null,
+            errorMessage = null,
+            onBackToPreviousClick = { },
+            onCancelClick = { })
     }
 }
 
@@ -379,13 +437,18 @@ fun PaymentScreenReadyPreview() {
 @Composable
 fun PaymentScreenSuccessPreview() {
     Switcloudl2demoktTheme {
-        PaymentScreenContent("1000",
-                             QUALCOMM,
-                             true,
-                             true,
-                             null,
-                             { },
-                             { })
+        PaymentScreenContent(
+            "1000",
+            shouldDisplayNfcLogo = true,
+            shouldDisplayBackAction = true,
+            shouldDisplayFooter = true,
+            isSplitScreen = false,
+            isSmallSquareScreen = false,
+            ready = true,
+            success = true,
+            errorMessage = null,
+            onBackToPreviousClick = { },
+            onCancelClick = { })
     }
 }
 
@@ -394,12 +457,17 @@ fun PaymentScreenSuccessPreview() {
 @Composable
 fun PaymentScreenErrorPreview() {
     Switcloudl2demoktTheme {
-        PaymentScreenContent("1000",
-                             QUALCOMM,
-                             true,
-                             false,
-                             "Error",
-                             { },
-                             { })
+        PaymentScreenContent(
+            "1000",
+            shouldDisplayNfcLogo = true,
+            shouldDisplayBackAction = true,
+            shouldDisplayFooter = true,
+            isSplitScreen = false,
+            isSmallSquareScreen = false,
+            ready = true,
+            success = false,
+            errorMessage = "Error",
+            onBackToPreviousClick = { },
+            onCancelClick = { })
     }
 }

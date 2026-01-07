@@ -7,12 +7,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
+import io.switstack.switcloud.switcloud_l2_demo.secondary_display.SecondaryDisplayManager
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorModeEnum.CONNECTED
@@ -22,9 +25,12 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorMode
 class MainActivity : AppCompatActivity() {
 
     val paymentViewModel: PaymentViewModel by viewModels()
+    lateinit var secondaryDisplayManager: SecondaryDisplayManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        secondaryDisplayManager = SecondaryDisplayManager(this)
+
         if(BuildConfig.DEBUG) {
             println("${Build.BRAND} ${Build.PRODUCT}")
             println("${Build.BRAND.uppercase()}_${Build.PRODUCT.uppercase()}")
@@ -36,17 +42,20 @@ class MainActivity : AppCompatActivity() {
 
         paymentViewModel.setupSwitcloudL2(this)
         setContent {
-            Switcloudl2demoktTheme {
-                // Call the orientation locker here
-                LockScreenOrientation()
+            CompositionLocalProvider(LocalSecondaryDisplayManager provides secondaryDisplayManager) {
+                Switcloudl2demoktTheme {
+                    // Call the orientation locker here
+                    LockScreenOrientation()
 
-                MyApp(paymentViewModel)
+                    MyApp(paymentViewModel)
+                }
             }
         }
     }
 
     override fun onDestroy() {
         paymentViewModel.cleanupSwitcloudL2()
+        secondaryDisplayManager.release()
         super.onDestroy()
     }
 }

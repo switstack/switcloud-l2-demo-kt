@@ -31,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,9 +44,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
+import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
+import io.switstack.switcloud.switcloud_l2_demo.secondary_display.SunmiBrandsScreen
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 import io.switstack.switcloud.switcloud_l2_demo.utils.isCompactDevice
 import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallSquareScreen
 
@@ -56,11 +61,20 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
     val keyboardVisible = WindowInsets.isImeVisible
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val isSmallSquareScreen = isSmallSquareScreen()
+    val secondaryDisplayManager = LocalSecondaryDisplayManager.current
 
     val config = when {
         isSmallSquareScreen -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.15f, MaterialTheme.typography.displayLarge)
         isLandscape         -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.27f, MaterialTheme.typography.displayLarge)
         else                -> PaymentDisplayConfig(R.drawable.bg_payment_port, 0.32f, MaterialTheme.typography.displaySmall)
+    }
+
+    if (getFlavorTarget() == FlavorTargetEnum.SUNMI) {
+        LaunchedEffect(Unit) {
+            secondaryDisplayManager?.show {
+                SunmiBrandsScreen()
+            }
+        }
     }
 
     Surface {

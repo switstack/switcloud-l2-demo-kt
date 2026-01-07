@@ -28,4 +28,11 @@ import androidx.compose.ui.tooling.preview.Preview
     widthDp = 480,
     heightDp = 480
 )
+@Preview(
+    name = "Sunmi terminal small screen",
+    group = "Phone",
+    device = PHONE,
+    widthDp = 800,
+    heightDp = 480
+)
 annotation class TabletPhonePreviews

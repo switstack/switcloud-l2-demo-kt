@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,14 +45,16 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices.PHONE
-import androidx.compose.ui.tooling.preview.Devices.TABLET
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
+import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
+import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallHeightScreen
 
 @Composable
 fun PinEntryScreen(paymentViewModel: PaymentViewModel,
@@ -59,6 +62,7 @@ fun PinEntryScreen(paymentViewModel: PaymentViewModel,
 
     var pin by rememberSaveable { mutableStateOf("") }
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val secondaryDisplayManager = LocalSecondaryDisplayManager.current
 
     fun addDigit() {
         if (pin.length < 12) {
@@ -71,10 +75,32 @@ fun PinEntryScreen(paymentViewModel: PaymentViewModel,
             pin = pin.dropLast(1)
         }
     }
+    if (getFlavorTarget() == FlavorTargetEnum.SUNMI) {
+        LaunchedEffect(Unit) {
+            secondaryDisplayManager?.show {
+                PinEntryScreenContent(
+                    isLandscape,
+                    pin,
+                    true,
+                    { addDigit()},
+                    { removeDigit() },
+                    {
+                        paymentViewModel.setPinVerdict(false)
+                        onPinVerified()
+                    },
+                    {
+                        paymentViewModel.setPinVerdict(true)
+                        onPinVerified()
+                    }
+                )
+            }
+        }
+    }
 
     PinEntryScreenContent(
         isLandscape,
         pin,
+        getFlavorTarget() != FlavorTargetEnum.SUNMI && secondaryDisplayManager?.secondaryDisplayExists() != true,
         { addDigit()},
         { removeDigit() },
         {
@@ -91,15 +117,17 @@ fun PinEntryScreen(paymentViewModel: PaymentViewModel,
 @Composable
 fun PinEntryScreenContent(isLandScape: Boolean,
                           pin: String,
+                          shouldShowPinEntry: Boolean = true,
                           onPinButtonClicked: (String) -> Unit,
                           onBackSpaceClicked: () -> Unit,
                           onCancelClick: () -> Unit,
                           onPinValidationClick: () -> Unit) {
+    val isSmallHeightScreen = isSmallHeightScreen()
 
-    val config = if(isLandScape) {
-        PaymentDisplayConfig(R.drawable.bg_payment_land, 0.27f, MaterialTheme.typography.displayLarge)
-    } else {
-        PaymentDisplayConfig(R.drawable.bg_payment_port, 0.32f, MaterialTheme.typography.displaySmall)
+    val config = when {
+        isSmallHeightScreen -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.15f, MaterialTheme.typography.displaySmall)
+        isLandScape -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.27f, MaterialTheme.typography.displayLarge)
+        else -> PaymentDisplayConfig(R.drawable.bg_payment_port, 0.32f, MaterialTheme.typography.displaySmall)
     }
 
     Surface {
@@ -115,8 +143,9 @@ fun PinEntryScreenContent(isLandScape: Boolean,
                 .fillMaxWidth(),
                 contentAlignment = Alignment.Center) {
                 Text(
-                    text = stringResource(R.string.enter_your_pin),
+                    text = stringResource(if(shouldShowPinEntry) R.string.enter_your_pin else R.string.customer_pin_entry),
                     style = config.headerTextStyle,
+                    autoSize = TextAutoSize.StepBased(maxFontSize = config.headerTextStyle.fontSize),
                     color = MaterialTheme.colorScheme.onPrimary)
             }
             Column (modifier = Modifier
@@ -125,76 +154,81 @@ fun PinEntryScreenContent(isLandScape: Boolean,
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.weight(0.5f))
-                Text(modifier = Modifier.padding(16.dp),
-                    style = config.headerTextStyle,
-                    textAlign = TextAlign.Center,
-                    text = pin)
-                Spacer(modifier = Modifier.weight(0.2f))
-                LazyVerticalGrid(
+                if(shouldShowPinEntry) {
+                    Spacer(modifier = Modifier.weight(0.5f))
+                    Text(modifier = Modifier.padding(if(isSmallHeightScreen) 0.dp else 16.dp),
+                        style = config.headerTextStyle,
+                        textAlign = TextAlign.Center,
+                        text = pin)
+                    Spacer(modifier = Modifier.weight(0.2f))
+                    LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
                         modifier = Modifier
                             .padding(start = 16.dp, end = 16.dp)
                             .widthIn(max = 500.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-                    items(15) { index ->
-                        when (index) {
-                            in 0..8, 10 -> {
-                                val number = (index + 1) % 11 // modulo to get only unit part
-                                PinButton(
-                                    onClick = { onPinButtonClicked("$number") },
-                                    content = { Text("$number", style = MaterialTheme.typography.titleLarge) })
-                            }
-                            12    -> OperationButton(
-                                onClick = onCancelClick,
-                                enableCondition = { true },
-                                enabledButtonColor = MaterialTheme.colorScheme.error,
-                                content = {
-                                    Text("Cancel",
-                                        autoSize = TextAutoSize.StepBased(maxFontSize = 22.sp),
-                                        style = MaterialTheme.typography.titleLarge)
+                    ) {
+                        items(15) { index ->
+                            when (index) {
+                                in 0..8, 10 -> {
+                                    val number = (index + 1) % 11 // modulo to get only unit part
+                                    PinButton(
+                                        onClick = { onPinButtonClicked("$number") },
+                                        content = { Text("$number", style = MaterialTheme.typography.titleLarge) })
                                 }
-                            )
-                            13    -> OperationButton(
-                                onClick = onBackSpaceClicked,
-                                enableCondition = { pin.isNotEmpty() },
-                                enabledButtonColor = MaterialTheme.colorScheme.inversePrimary,
-                                content = {
-                                    Icon(
-                                        modifier = Modifier.size(32.dp),
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "Backspace",
-                                        tint = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                }
-                            )
-                            14   -> OperationButton(
-                                onClick = onPinValidationClick,
-                                enableCondition = { pin.length >= 4 },
-                                enabledButtonColor = MaterialTheme.colorScheme.tertiary,
-                                content = {
-                                    Icon(
-                                        modifier = Modifier.size(36.dp),
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = "Checkmark",
-                                        tint = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                }
-                            )
-                            /*else -> {
-                                PinButton(
-                                    onClick = {},
-                                    enabled = false) {
+                                12          -> OperationButton(
+                                    onClick = onCancelClick,
+                                    enableCondition = { true },
+                                    enabledButtonColor = MaterialTheme.colorScheme.error,
+                                    content = {
+                                        Text(
+                                            "Cancel",
+                                            autoSize = TextAutoSize.StepBased(maxFontSize = 22.sp),
+                                            style = MaterialTheme.typography.titleLarge)
+                                    }
+                                )
+                                13          -> OperationButton(
+                                    onClick = onBackSpaceClicked,
+                                    enableCondition = { pin.isNotEmpty() },
+                                    enabledButtonColor = MaterialTheme.colorScheme.inversePrimary,
+                                    content = {
+                                        Icon(
+                                            modifier = Modifier.size(32.dp),
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = "Backspace",
+                                            tint = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    }
+                                )
+                                14          -> OperationButton(
+                                    onClick = onPinValidationClick,
+                                    enableCondition = { pin.length >= 4 },
+                                    enabledButtonColor = MaterialTheme.colorScheme.tertiary,
+                                    content = {
+                                        Icon(
+                                            modifier = Modifier.size(36.dp),
+                                            imageVector = Icons.Filled.Check,
+                                            contentDescription = "Checkmark",
+                                            tint = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    }
+                                )
+                                /*else -> {
+                                    PinButton(
+                                        onClick = {},
+                                        enabled = false) {
 
-                                }
-                            }*/
+                                    }
+                                }*/
+                            }
                         }
                     }
                 }
                 Spacer(modifier = Modifier.weight(0.5f))
-                Footer()
+                if(!isSmallHeightScreen) {
+                    Footer()
+                }
             }
         }
     }
@@ -228,12 +262,10 @@ fun OperationButton(onClick: () -> Unit, enabledButtonColor: Color, enableCondit
         onClick = onClick,
         content = content)
 
-@Preview(device = TABLET)
-@Preview(device = PHONE)
-@Preview(device = TABLET, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@TabletPhonePreviews()
 @Composable
 fun PinEntryScreenPreview() {
     Switcloudl2demoktTheme {
-        PinEntryScreenContent(true, "****", {}, {}, {}, {})
+        PinEntryScreenContent(true, "****", true, {}, {}, {}, {})
     }
 }
