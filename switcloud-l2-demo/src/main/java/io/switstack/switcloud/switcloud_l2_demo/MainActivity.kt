@@ -1,6 +1,7 @@
 package io.switstack.switcloud.switcloud_l2_demo
 
 import LockScreenOrientation
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -17,7 +18,9 @@ import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorModeEnum.CONNECTED
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorModeEnum.STANDALONE
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum.QUALCOMM
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorMode
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if(BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
             println("${Build.BRAND} ${Build.PRODUCT}")
             println("${Build.BRAND.uppercase()}_${Build.PRODUCT.uppercase()}")
         }
@@ -43,6 +46,23 @@ class MainActivity : AppCompatActivity() {
                 MyApp(paymentViewModel)
             }
         }
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        val widthInch = with(newBase.resources.configuration) { screenWidthDp / densityDpi }
+        super.attachBaseContext(
+            // in case of a large screen width in qualcomm and standalone configuration
+            // the dpi will be set at 240 to display with a nice arrangement
+            if (getFlavorTarget() == QUALCOMM && getFlavorMode() == STANDALONE && widthInch > 10) {
+                newBase.createConfigurationContext(
+                    newBase.resources.configuration.apply {
+                        densityDpi = 240
+                    }
+                )
+            } else {
+                newBase
+            }
+        )
     }
 
     override fun onDestroy() {
