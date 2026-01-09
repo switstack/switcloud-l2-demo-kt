@@ -34,24 +34,35 @@ import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.switstack.switcloud.switcloud_l2_demo.ui.ButtonType
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_onSurface
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_surface
 import io.switstack.switcloud.switcloud_l2_demo.utils.isCompactDevice
+import java.util.Locale
 
 @Composable
 fun ShoppingCartScreen(
-        onProceedPaymentClick: (total: String) -> Unit
+    onProceedPaymentClick: (total: String) -> Unit
 ) {
     val items = (1..5).map { it to it * 10.0 }
-    val total = String.format("%.2f", items.sumOf { it.second })
+    val total = String.format(Locale.ROOT, "%.2f", items.sumOf { it.second })
 
-    val config = if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        PaymentDisplayConfig(R.drawable.bg_payment_land, 0.27f, MaterialTheme.typography.displayLarge)
-    } else {
-        PaymentDisplayConfig(R.drawable.bg_payment_port, 0.32f, MaterialTheme.typography.displaySmall)
-    }
+    val config =
+        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            PaymentDisplayConfig(
+                R.drawable.bg_payment_land,
+                0.27f,
+                MaterialTheme.typography.displayLarge
+            )
+        } else {
+            PaymentDisplayConfig(
+                R.drawable.bg_payment_port,
+                0.32f,
+                MaterialTheme.typography.displaySmall
+            )
+        }
 
     val ticketTextStyle = TextStyle(
         fontSize = if (isCompactDevice()) 12.sp else 18.sp,
@@ -64,20 +75,23 @@ fun ShoppingCartScreen(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillHeight,
             painter = painterResource(config.backgroundResource),
-            contentDescription = "Payment background")
+            contentDescription = "Payment background"
+        )
         Column {
             Box(
                 modifier = Modifier
                     .fillMaxHeight(config.headerPercent)
                     .fillMaxWidth(),
-                contentAlignment = Alignment.Center) {
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.Center),
                     text = "Shopping cart",
                     color = MaterialTheme.colorScheme.onPrimary,
-                    style = config.headerTextStyle)
+                    style = config.headerTextStyle
+                )
             }
             Column(
                 modifier = Modifier
@@ -99,12 +113,10 @@ fun ShoppingCartScreen(
                         color = md_theme_light_surface,
                         shape = RoundedCornerShape(16.dp)
                     ) {
-
                         Column(
                             modifier = Modifier.padding(16.dp),
                             horizontalAlignment = Alignment.Start
                         ) {
-
                             // Hardcoded shopping cart items
                             items.forEach { (item, price) ->
                                 Row(
@@ -112,7 +124,7 @@ fun ShoppingCartScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text("Item $item", style = ticketTextStyle)
-                                    Text("$${price}", style = ticketTextStyle)
+                                    Text("$$price", style = ticketTextStyle)
                                 }
                             }
                             Spacer(modifier = Modifier.height(16.dp))
@@ -131,7 +143,8 @@ fun ShoppingCartScreen(
                     buttonType = ButtonType.Filled,
                     onClick = {
                         onProceedPaymentClick(total)
-                    })
+                    }
+                )
                 Footer()
             }
         }

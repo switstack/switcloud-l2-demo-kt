@@ -156,7 +156,7 @@ dependencies {
 /* Detekt --------------------------------------------------------------------------------------- */
 
 detekt {
-    autoCorrect = false
+    autoCorrect = true
     toolVersion = "1.23.8"
     source.setFrom("src/main/java/")
     config.setFrom("../conf/detekt/detekt.yml")

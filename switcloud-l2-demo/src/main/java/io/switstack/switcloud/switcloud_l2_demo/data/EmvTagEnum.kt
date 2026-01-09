@@ -122,5 +122,4 @@ enum class EmvTagEnum(val tagName: String) {
          */
         fun fromTag(tag: String) = map[tag]
     }
-
 }

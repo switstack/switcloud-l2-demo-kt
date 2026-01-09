@@ -57,9 +57,10 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarge
 import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallHeightScreen
 
 @Composable
-fun PinEntryScreen(paymentViewModel: PaymentViewModel,
-                   onPinVerified: () -> Unit) {
-
+fun PinEntryScreen(
+    paymentViewModel: PaymentViewModel,
+    onPinVerified: () -> Unit
+) {
     var pin by rememberSaveable { mutableStateOf("") }
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val secondaryDisplayManager = LocalSecondaryDisplayManager.current
@@ -82,7 +83,7 @@ fun PinEntryScreen(paymentViewModel: PaymentViewModel,
                     isLandscape,
                     pin,
                     true,
-                    { addDigit()},
+                    { addDigit() },
                     { removeDigit() },
                     {
                         paymentViewModel.setPinVerdict(false)
@@ -101,7 +102,7 @@ fun PinEntryScreen(paymentViewModel: PaymentViewModel,
         isLandscape,
         pin,
         getFlavorTarget() != FlavorTargetEnum.SUNMI && secondaryDisplayManager?.secondaryDisplayExists() != true,
-        { addDigit()},
+        { addDigit() },
         { removeDigit() },
         {
             paymentViewModel.setPinVerdict(false)
@@ -115,13 +116,15 @@ fun PinEntryScreen(paymentViewModel: PaymentViewModel,
 }
 
 @Composable
-fun PinEntryScreenContent(isLandScape: Boolean,
-                          pin: String,
-                          shouldShowPinEntry: Boolean = true,
-                          onPinButtonClicked: (String) -> Unit,
-                          onBackSpaceClicked: () -> Unit,
-                          onCancelClick: () -> Unit,
-                          onPinValidationClick: () -> Unit) {
+fun PinEntryScreenContent(
+    isLandScape: Boolean,
+    pin: String,
+    shouldShowPinEntry: Boolean = true,
+    onPinButtonClicked: (String) -> Unit,
+    onBackSpaceClicked: () -> Unit,
+    onCancelClick: () -> Unit,
+    onPinValidationClick: () -> Unit
+) {
     val isSmallHeightScreen = isSmallHeightScreen()
 
     val config = when {
@@ -135,31 +138,38 @@ fun PinEntryScreenContent(isLandScape: Boolean,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillHeight,
             painter = painterResource(config.backgroundResource),
-            contentDescription = "Payment background")
+            contentDescription = "Payment background"
+        )
 
         Column {
-            Box(modifier = Modifier
-                .fillMaxHeight(config.headerPercent)
-                .fillMaxWidth(),
-                contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight(config.headerPercent)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
-                    text = stringResource(if(shouldShowPinEntry) R.string.enter_your_pin else R.string.customer_pin_entry),
+                    text = stringResource(R.string.enter_your_pin),
                     style = config.headerTextStyle,
                     autoSize = TextAutoSize.StepBased(maxFontSize = config.headerTextStyle.fontSize),
-                    color = MaterialTheme.colorScheme.onPrimary)
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
             }
-            Column (modifier = Modifier
-                .fillMaxSize()
-                .clip(shape = RoundedCornerShape(48.dp, 48.dp, 0.dp, 0.dp))
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)),
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(shape = RoundedCornerShape(48.dp, 48.dp, 0.dp, 0.dp))
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if(shouldShowPinEntry) {
+                if (shouldShowPinEntry) {
                     Spacer(modifier = Modifier.weight(0.5f))
-                    Text(modifier = Modifier.padding(if(isSmallHeightScreen) 0.dp else 16.dp),
+                    Text(
+                        modifier = Modifier.padding(if (isSmallHeightScreen) 0.dp else 16.dp),
                         style = config.headerTextStyle,
                         textAlign = TextAlign.Center,
-                        text = pin)
+                        text = pin
+                    )
                     Spacer(modifier = Modifier.weight(0.2f))
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
@@ -175,9 +185,11 @@ fun PinEntryScreenContent(isLandScape: Boolean,
                                     val number = (index + 1) % 11 // modulo to get only unit part
                                     PinButton(
                                         onClick = { onPinButtonClicked("$number") },
-                                        content = { Text("$number", style = MaterialTheme.typography.titleLarge) })
+                                        content = { Text("$number", style = MaterialTheme.typography.titleLarge) }
+                                    )
                                 }
-                                12          -> OperationButton(
+
+                                12 -> OperationButton(
                                     onClick = onCancelClick,
                                     enableCondition = { true },
                                     enabledButtonColor = MaterialTheme.colorScheme.error,
@@ -185,10 +197,12 @@ fun PinEntryScreenContent(isLandScape: Boolean,
                                         Text(
                                             "Cancel",
                                             autoSize = TextAutoSize.StepBased(maxFontSize = 22.sp),
-                                            style = MaterialTheme.typography.titleLarge)
+                                            style = MaterialTheme.typography.titleLarge
+                                        )
                                     }
                                 )
-                                13          -> OperationButton(
+
+                                13 -> OperationButton(
                                     onClick = onBackSpaceClicked,
                                     enableCondition = { pin.isNotEmpty() },
                                     enabledButtonColor = MaterialTheme.colorScheme.inversePrimary,
@@ -201,7 +215,8 @@ fun PinEntryScreenContent(isLandScape: Boolean,
                                         )
                                     }
                                 )
-                                14          -> OperationButton(
+
+                                14 -> OperationButton(
                                     onClick = onPinValidationClick,
                                     enableCondition = { pin.length >= 4 },
                                     enabledButtonColor = MaterialTheme.colorScheme.tertiary,
@@ -226,7 +241,7 @@ fun PinEntryScreenContent(isLandScape: Boolean,
                     }
                 }
                 Spacer(modifier = Modifier.weight(0.5f))
-                if(!isSmallHeightScreen) {
+                if (!isSmallHeightScreen) {
                     Footer()
                 }
             }
@@ -257,10 +272,12 @@ fun OperationButton(onClick: () -> Unit, enabledButtonColor: Color, enableCondit
             enabledButtonColor,
             MaterialTheme.colorScheme.onPrimary,
             enabledButtonColor.copy(alpha = 0.3f),
-            MaterialTheme.colorScheme.onPrimary),
+            MaterialTheme.colorScheme.onPrimary
+        ),
         enabled = enableCondition(),
         onClick = onClick,
-        content = content)
+        content = content
+    )
 
 @TabletPhonePreviews()
 @Composable

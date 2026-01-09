@@ -28,21 +28,22 @@ import io.switstack.switcloud.switcloud_l2_demo.R
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 
 @Composable
-fun SunmiBrandsScreen () {
-
+fun SunmiBrandsScreen() {
     val spacersWeight = 0.5f
 
     Image(
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.FillHeight,
         painter = painterResource(R.drawable.bg_payment_land),
-        contentDescription = "Payment background")
+        contentDescription = "Payment background"
+    )
     Column {
         Box(
             modifier = Modifier
                 .fillMaxHeight(0.27f)
                 .fillMaxWidth(),
-            contentAlignment = Alignment.Center) { }
+            contentAlignment = Alignment.Center
+        ) { }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -60,9 +61,9 @@ fun SunmiBrandsScreen () {
                 contentDescription = "Sunmi brand Logo",
                 alignment = Alignment.Center,
                 contentScale = ContentScale.FillHeight,
-                colorFilter = if (isSystemInDarkTheme())
+                colorFilter = if (isSystemInDarkTheme()) {
                     ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
-                else {
+                } else {
                     ColorFilter.tint(Color(0xFFFF6801))
                 }
             )
@@ -72,10 +73,11 @@ fun SunmiBrandsScreen () {
                     .weight(1f)
                     .padding(horizontal = 5.dp),
                 painter = painterResource(
-                    id = if (isSystemInDarkTheme())
+                    id = if (isSystemInDarkTheme()) {
                         R.drawable.ic_switstack_dark
-                    else
+                    } else {
                         R.drawable.ic_switstack_light
+                    }
                 ),
                 contentDescription = "Switstack Logo",
                 contentScale = ContentScale.Fit
@@ -88,10 +90,10 @@ fun SunmiBrandsScreen () {
                 painter = painterResource(id = R.drawable.ic_dragonwing),
                 contentDescription = "Qualcomm Logo",
                 contentScale = ContentScale.FillHeight,
-                colorFilter = if (isSystemInDarkTheme())
-                // using contrasted color with background
+                colorFilter = if (isSystemInDarkTheme()) {
+                    // using contrasted color with background
                     ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
-                else {
+                } else {
                     ColorFilter.tint(Color(0xFF31017D))
                 }
             )
@@ -109,7 +111,7 @@ fun SunmiBrandsScreen () {
 )
 @Composable
 fun SunmiBrandsScreenPreview() {
-    Switcloudl2demoktTheme() {
+    Switcloudl2demoktTheme {
         SunmiBrandsScreen()
     }
 }

@@ -40,7 +40,12 @@ object TlvUtils {
                     tagBytes++
                 }
             }
-            val tagHex = ByteArrayHexStringUtils.byteArrayToHexString(tlvBytes.copyOfRange(offset, offset + tagBytes))
+            val tagHex = ByteArrayHexStringUtils.byteArrayToHexString(
+                tlvBytes.copyOfRange(
+                    offset,
+                    offset + tagBytes
+                )
+            )
             offset += tagBytes
 
             // Parse Length
@@ -91,7 +96,6 @@ object TlvUtils {
     }
 
     fun makeGlaseCombination(emv: EMVCreateSchema): ByteArray {
-
         val e1Data = BerTlvBuilder()
 
         // AID
@@ -119,14 +123,15 @@ object TlvUtils {
 
             else ->
                 throw SwitcloudL2DemoException(
-                    "Unsupported Transaction Type: $transactionType")
+                    "Unsupported Transaction Type: $transactionType"
+                )
         }
 
         // ASF
         e1Data.addHex(
             BerTag(0xDF, 0xA0, 0x10),
-            if (emv.asf == null || emv.asf == false) "00" else "01")
-
+            if (emv.asf == null || emv.asf == false) "00" else "01"
+        )
 
         // E2 group
         e1Data.addHex(BerTag(0xE2), emv.tlv)
@@ -138,7 +143,6 @@ object TlvUtils {
     }
 
     private fun sizeToBEBytes(size: Int, outputByteSize: Int): ByteArray {
-
         val bytes = ByteArray(outputByteSize)
 
         for (b in 0..<outputByteSize) {
@@ -149,7 +153,6 @@ object TlvUtils {
     }
 
     fun makeGlaseCAKey(capk: CAPKCreateSchema): ByteArray {
-
         val maxIndexSize = 2
         val maxModulusSize = 512
         val modulusLengthSize = 4
@@ -182,21 +185,19 @@ object TlvUtils {
         val modulusLength = sizeToBEBytes(modulus.length / 2, modulusLengthSize / 2)
         val exponentLength = sizeToBEBytes(exponent.length / 2, exponentLengthSize / 2)
 
-        val cakey =
-            rid +
-                    index +
-                    hashIndicatorUndefined +
-                    algorithmIndicatorRSA +
-                    HexUtil.toHexString(modulusLength) +
-                    modulus.padEnd(maxModulusSize, '0') +
-                    HexUtil.toHexString(exponentLength) +
-                    exponent.padEnd(maxExponentSize, '0') +
-                    hash
+        val cakey = rid +
+            index +
+            hashIndicatorUndefined +
+            algorithmIndicatorRSA +
+            HexUtil.toHexString(modulusLength) +
+            modulus.padEnd(maxModulusSize, '0') +
+            HexUtil.toHexString(exponentLength) +
+            exponent.padEnd(maxExponentSize, '0') +
+            hash
 
         val builder = BerTlvBuilder()
         builder.addHex(BerTag(0xDF, 0xA0, 0x23), cakey)
 
         return builder.buildArray()
     }
-
 }

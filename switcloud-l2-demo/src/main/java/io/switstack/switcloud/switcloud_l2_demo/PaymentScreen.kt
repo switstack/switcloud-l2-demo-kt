@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
+import io.switstack.switcloud.switcloud_l2_demo.ui.ButtonType
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues.ImageConfig
@@ -54,12 +55,13 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallSquareScreen
 import kotlinx.coroutines.delay
 
 @Composable
-fun PaymentScreen(paymentViewModel: PaymentViewModel,
-                  amount: String,
-                  onPinRequired: () -> Unit,
-                  onPaymentVerdict: (Boolean, String?) -> Unit,
-                  onBackToPreviousClick: () -> Unit,
-                  onCancelClick: () -> Unit
+fun PaymentScreen(
+    paymentViewModel: PaymentViewModel,
+    amount: String,
+    onPinRequired: () -> Unit,
+    onPaymentVerdict: (Boolean, String?) -> Unit,
+    onBackToPreviousClick: () -> Unit,
+    onCancelClick: () -> Unit
 ) {
     val uiState by paymentViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -75,7 +77,10 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 
     val isSmallSquareScreen = isSmallSquareScreen()
 
-    PaymentScreenContent(amountFormatted,
+    val isInitialized = uiState.initialized && uiState.success == null && uiState.errorMessageResource == null && uiState.tlvString == null
+
+    PaymentScreenContent(
+        amountFormatted,
         shouldDisplayNfcLogo = shouldDisplayNfcOnPrimaryScreen,
         shouldDisplayBackAction = true,
         shouldDisplayFooter = !isSmallSquareScreen,
@@ -85,7 +90,8 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
         success = uiState.success,
         errorMessage = uiState.declinedOpsStatusAndErrorIndicationMessage ?: uiState.errorMessageResource?.let { stringResource(it) },
         onBackToPreviousClick = onBackToPreviousClick,
-        onCancelClick = onCancelClick)
+        onCancelClick = onCancelClick
+    )
 
     if (getFlavorTarget() == FlavorTargetEnum.SUNMI) {
         LaunchedEffect(Unit) {
@@ -108,11 +114,7 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
     }
 
     LaunchedEffect(uiState.initialized) {
-        if (uiState.initialized
-            && uiState.success == null
-            && uiState.errorMessageResource == null
-            && uiState.tlvString == null)
-        {
+        if (isInitialized) {
             paymentViewModel.processPayment(amountFormatted)
         }
     }
@@ -125,7 +127,7 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 
     LaunchedEffect(uiState.success) {
         delay(3000)
-        if(uiState.success != null) {
+        if (uiState.success != null) {
             uiState.tlvString?.let { tlvStream ->
                 onPaymentVerdict(uiState.success == true, tlvStream)
             }
@@ -134,17 +136,18 @@ fun PaymentScreen(paymentViewModel: PaymentViewModel,
 }
 
 @Composable
-fun PaymentScreenContent(amount: String,
-                         shouldDisplayNfcLogo: Boolean,
-                         shouldDisplayBackAction: Boolean,
-                         shouldDisplayFooter: Boolean,
-                         isSplitScreen: Boolean,
-                         isSmallSquareScreen: Boolean,
-                         ready: Boolean,
-                         success: Boolean?,
-                         errorMessage: String?,
-                         onBackToPreviousClick: () -> Unit,
-                         onCancelClick: () -> Unit
+fun PaymentScreenContent(
+    amount: String,
+    shouldDisplayNfcLogo: Boolean,
+    shouldDisplayBackAction: Boolean,
+    shouldDisplayFooter: Boolean,
+    isSplitScreen: Boolean,
+    isSmallSquareScreen: Boolean,
+    ready: Boolean,
+    success: Boolean?,
+    errorMessage: String?,
+    onBackToPreviousClick: () -> Unit,
+    onCancelClick: () -> Unit
 ) {
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
@@ -152,31 +155,34 @@ fun PaymentScreenContent(amount: String,
         isSmallSquareScreen -> PaymentDisplayConfig(
             when {
                 errorMessage != null -> R.drawable.bg_error_land
-                success == true      -> R.drawable.bg_success_land
-                else                 -> R.drawable.bg_payment_land
+                success == true -> R.drawable.bg_success_land
+                else -> R.drawable.bg_payment_land
             },
             0.15f,
             MaterialTheme.typography.displayLarge
         )
-        isLandscape         -> PaymentDisplayConfig(
+
+        isLandscape -> PaymentDisplayConfig(
             when {
                 errorMessage != null -> R.drawable.bg_error_land
-                success == true      -> R.drawable.bg_success_land
-                else                 -> R.drawable.bg_payment_land
+                success == true -> R.drawable.bg_success_land
+                else -> R.drawable.bg_payment_land
             },
             0.27f,
             MaterialTheme.typography.displayLarge
         )
-        else                -> PaymentDisplayConfig(
+
+        else -> PaymentDisplayConfig(
             when {
                 errorMessage != null -> R.drawable.bg_error_port
-                success == true      -> R.drawable.bg_success_port
-                else                 -> R.drawable.bg_payment_port
+                success == true -> R.drawable.bg_success_port
+                else -> R.drawable.bg_payment_port
             },
             0.32f,
             MaterialTheme.typography.displaySmall
         )
     }
+
     val contentValues = when {
         errorMessage != null || success == false -> {
             val displayedMessage = errorMessage ?: stringResource(R.string.declined)
@@ -194,12 +200,14 @@ fun PaymentScreenContent(amount: String,
                         stringResource(R.string.error_combination_selection),
                         stringResource(R.string.error_not_ready),
                         stringResource(R.string.error_init_failed)
-                    )  -> null
+                    ) -> null
+
                     else -> R.string.back_to_previous
                 },
                 MaterialTheme.colorScheme.error
             )
         }
+
         success == true -> {
             PaymentDisplayedStateValues(
                 ImageConfig(R.drawable.ic_checkmark, 100.dp, "Success checkmark"),
@@ -208,6 +216,7 @@ fun PaymentScreenContent(amount: String,
                 MaterialTheme.colorScheme.tertiary
             )
         }
+
         !ready -> {
             PaymentDisplayedStateValues(
                 null,
@@ -216,6 +225,7 @@ fun PaymentScreenContent(amount: String,
                 null
             )
         }
+
         else -> {
             PaymentDisplayedStateValues(
                 when {
@@ -234,9 +244,9 @@ fun PaymentScreenContent(amount: String,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillHeight,
             painter = painterResource(config.backgroundResource),
-            contentDescription = "Payment background")
+            contentDescription = "Payment background"
+        )
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -258,11 +268,12 @@ fun PaymentScreenContent(amount: String,
                 }
             }
             Row {
-                if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE && isSplitScreen) {
+                if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE &&
+                    isSplitScreen
+                ) {
                     Box(Modifier.weight(1f)) { }
                 }
                 Box(Modifier.weight(1f)) {
-
                     Column {
                         Spacer(modifier = Modifier.fillMaxHeight(config.headerPercent))
                         Box(
@@ -275,7 +286,8 @@ fun PaymentScreenContent(amount: String,
 
                     Column(
                         modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Spacer(modifier = Modifier.weight(0.5f))
                         Box(
                             modifier = Modifier.size(200.dp),
@@ -301,23 +313,24 @@ fun PaymentScreenContent(amount: String,
                             Text(
                                 modifier = Modifier.padding(bottom = 16.dp),
                                 text = contentValues.text,
-                                color =  contentValues.colorTint ?: MaterialTheme.colorScheme.onSurface,
+                                color = contentValues.colorTint ?: MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.headlineSmall)
-
+                                style = MaterialTheme.typography.headlineSmall
+                            )
 
                             contentValues.buttonText?.let { stringId ->
-                                if(shouldDisplayBackAction || stringId == R.string.cancel) {
+                                if (shouldDisplayBackAction || stringId == R.string.cancel) {
                                     Action(
                                         buttonText = stringResource(stringId),
                                         buttonType = ButtonType.Elevated,
                                         onClick = when (stringId) {
                                             R.string.cancel -> onCancelClick
-                                            else            -> onBackToPreviousClick
-                                        })
+                                            else -> onBackToPreviousClick
+                                        }
+                                    )
                                 }
                             }
-                            if(shouldDisplayFooter) {
+                            if (shouldDisplayFooter) {
                                 Footer()
                             }
                         }
@@ -333,7 +346,6 @@ fun PaymentScreenContent(amount: String,
             modifier = Modifier
                 .fillMaxSize(),
             onDraw = {
-
                 val canvasWidth = size.width
                 val canvasHeight = size.height
                 drawLine(
@@ -370,7 +382,8 @@ fun PaymentScreenLoadingPreview() {
             success = null,
             errorMessage = null,
             onBackToPreviousClick = { },
-            onCancelClick = { })
+            onCancelClick = { }
+        )
     }
 }
 
@@ -390,7 +403,8 @@ fun PaymentScreenLoadingFlytechPreview() {
             success = null,
             errorMessage = null,
             onBackToPreviousClick = { },
-            onCancelClick = { })
+            onCancelClick = { }
+        )
     }
 }
 
@@ -409,7 +423,8 @@ fun PaymentScreenReadyUnknownDevicePreview() {
             success = null,
             errorMessage = null,
             onBackToPreviousClick = { },
-            onCancelClick = { })
+            onCancelClick = { }
+        )
     }
 }
 
@@ -428,7 +443,8 @@ fun PaymentScreenReadyPreview() {
             success = null,
             errorMessage = null,
             onBackToPreviousClick = { },
-            onCancelClick = { })
+            onCancelClick = { }
+        )
     }
 }
 
@@ -448,7 +464,8 @@ fun PaymentScreenSuccessPreview() {
             success = true,
             errorMessage = null,
             onBackToPreviousClick = { },
-            onCancelClick = { })
+            onCancelClick = { }
+        )
     }
 }
 
@@ -468,6 +485,7 @@ fun PaymentScreenErrorPreview() {
             success = false,
             errorMessage = "Error",
             onBackToPreviousClick = { },
-            onCancelClick = { })
+            onCancelClick = { }
+        )
     }
 }

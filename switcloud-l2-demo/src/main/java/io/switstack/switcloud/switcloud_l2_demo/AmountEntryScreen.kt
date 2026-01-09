@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
 import io.switstack.switcloud.switcloud_l2_demo.secondary_display.SunmiBrandsScreen
+import io.switstack.switcloud.switcloud_l2_demo.ui.ButtonType
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
@@ -64,9 +65,23 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
     val secondaryDisplayManager = LocalSecondaryDisplayManager.current
 
     val config = when {
-        isSmallSquareScreen -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.15f, MaterialTheme.typography.displayLarge)
-        isLandscape         -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.27f, MaterialTheme.typography.displayLarge)
-        else                -> PaymentDisplayConfig(R.drawable.bg_payment_port, 0.32f, MaterialTheme.typography.displaySmall)
+        isSmallSquareScreen -> PaymentDisplayConfig(
+            R.drawable.bg_payment_land,
+            0.15f,
+            MaterialTheme.typography.displayLarge
+        )
+
+        isLandscape -> PaymentDisplayConfig(
+            R.drawable.bg_payment_land,
+            0.27f,
+            MaterialTheme.typography.displayLarge
+        )
+
+        else -> PaymentDisplayConfig(
+            R.drawable.bg_payment_port,
+            0.32f,
+            MaterialTheme.typography.displaySmall
+        )
     }
 
     if (getFlavorTarget() == FlavorTargetEnum.SUNMI) {
@@ -82,21 +97,24 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillHeight,
             painter = painterResource(config.backgroundResource),
-            contentDescription = "Payment background")
+            contentDescription = "Payment background"
+        )
         Column {
             Box(
                 modifier = Modifier
                     .fillMaxHeight(config.headerPercent)
                     .fillMaxWidth(),
-                contentAlignment = Alignment.Center) {
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.Center),
-                    text = stringResource(if(isSmallSquareScreen) R.string.select_amount else R.string.enter_amount),
+                    text = stringResource(if (isSmallSquareScreen) R.string.select_amount else R.string.enter_amount),
                     color = MaterialTheme.colorScheme.onPrimary,
                     autoSize = TextAutoSize.StepBased(maxFontSize = config.headerTextStyle.fontSize),
-                    style = config.headerTextStyle)
+                    style = config.headerTextStyle
+                )
             }
             Column(
                 modifier = Modifier
@@ -109,8 +127,8 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .weight(1f)) {
-
+                        .weight(1f)
+                ) {
                     ResponsiveLayout(
                         item1 = {
                             Column(
@@ -144,17 +162,25 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                             }
                         },
                         item2 = {
-                            if(!isSmallSquareScreen) {
+                            if (!isSmallSquareScreen) {
                                 TextField(
                                     modifier = Modifier.widthIn(max = 200.dp),
                                     state = customAmount,
                                     shape = RoundedCornerShape(8.dp),
                                     leadingIcon = {
-                                        Icon(imageVector = Icons.Filled.AttachMoney,
-                                            contentDescription = "Currency Symbol")
+                                        Icon(
+                                            imageVector = Icons.Filled.AttachMoney,
+                                            contentDescription = "Currency Symbol"
+                                        )
                                     },
                                     lineLimits = TextFieldLineLimits.SingleLine,
-                                    placeholder = { Text("Custom amount", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                                    placeholder = {
+                                        Text(
+                                            "Custom amount",
+                                            modifier = Modifier.fillMaxWidth(),
+                                            textAlign = TextAlign.Center
+                                        )
+                                    },
                                     keyboardOptions = KeyboardOptions.Default.copy(
                                         keyboardType = KeyboardType.Number,
                                         imeAction = ImeAction.Done
@@ -185,9 +211,9 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
 
 @Composable
 private fun ResponsiveLayout(
-        item1: @Composable () -> Unit,
-        item2: @Composable () -> Unit,
-        isLandscape: Boolean
+    item1: @Composable () -> Unit,
+    item2: @Composable () -> Unit,
+    isLandscape: Boolean
 ) {
     if (!isCompactDevice() && isLandscape) {
         Row(
@@ -231,7 +257,7 @@ class DigitOnlyInputTransformation : InputTransformation {
 @TabletPhonePreviews
 @Composable
 fun AmountEntryScreenPreview() {
-    Switcloudl2demoktTheme() {
-        AmountEntryScreen() { }
+    Switcloudl2demoktTheme {
+        AmountEntryScreen { }
     }
 }

@@ -25,7 +25,6 @@ class SecondaryDisplayManager(private val activity: Activity) {
                 println("Screen: $display")
 
                 val isSecure = (display.flags and Display.FLAG_SECURE) != 0
-                val supportsProtected = (display.flags and Display.FLAG_SUPPORTS_PROTECTED_BUFFERS) != 0
                 val isPresentation = (display.flags and Display.FLAG_PRESENTATION) != 0
 
                 // First real second screen
@@ -35,7 +34,7 @@ class SecondaryDisplayManager(private val activity: Activity) {
 
     fun show(content: @Composable () -> Unit) {
         secondaryPresentation?.apply {
-            if(isShowing) {
+            if (isShowing) {
                 secondaryPresentation?.dismiss()
                 secondaryPresentation = null
             }

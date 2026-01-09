@@ -1,6 +1,5 @@
 package io.switstack.switcloud.switcloud_l2_demo.secondary_display
 
-
 import android.app.Presentation
 import android.content.Context
 import android.os.Bundle
@@ -20,9 +19,9 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 
 class SecondaryPresentation(
-        context: Context,
-        display: Display,
-        val composable: @Composable () -> Unit
+    context: Context,
+    display: Display,
+    val composable: @Composable () -> Unit
 ) : Presentation(context, display) {
 
     private val lifecycleOwner = PresentationLifecycleOwner()

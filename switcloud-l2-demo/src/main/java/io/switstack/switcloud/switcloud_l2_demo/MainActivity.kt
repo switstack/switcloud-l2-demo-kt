@@ -104,7 +104,7 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
 
         composable("payment_entry") {
             paymentViewModel.resetPaymentState()
-            AmountEntryScreen() { total ->
+            AmountEntryScreen { total ->
                 navController.navigate("payment/$total") {
                     popUpTo("payment_entry") { inclusive = false }
                 }
@@ -162,7 +162,10 @@ fun MyApp(paymentViewModel: PaymentViewModel) {
             "payment_ticket/{success}?tlvStream={tlvStream}",
             arguments = listOf(
                 navArgument("success") { type = NavType.BoolType },
-                navArgument("tlvStream") { type = NavType.StringType; nullable = true }
+                navArgument("tlvStream") {
+                    type = NavType.StringType
+                    nullable = true
+                }
             )
         ) { backStackEntry ->
             val success = backStackEntry.arguments?.getBoolean("success") ?: false
