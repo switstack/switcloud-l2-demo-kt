@@ -1,7 +1,6 @@
 *.iml
 .gradle
 /local.properties
-/.idea
 .DS_Store
 /build
 /captures
@@ -45,10 +44,25 @@ local.properties
 c.gradle/
 /captures/
 
-# IDE-specific files
-.idea/
+# IDE-specific files (adding all to keep codeStyles/Project.xml)
 .idea/workspace.xml
 .idea/libraries/
+.idea/.gitignore
+.idea/.name
+.idea/AndroidProjectSystem.xml
+.idea/assetWizardSettings.xml
+.idea/compiler.xml
+.idea/deploymentTargetSelector.xml
+.idea/deviceManager.xml
+.idea/gradle.xml
+.idea/markdown.xml
+.idea/migrations.xml
+.idea/misc.xml
+.idea/runConfigurations.xml
+.idea/studiobot.xml
+.idea/vcs.xml
+.idea/caches/deviceStreaming.xml
+.idea/inspectionProfiles/Project_Default.xml
 *.iml
 *.ipr
 *.iws
