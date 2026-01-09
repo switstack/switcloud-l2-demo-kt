@@ -1,6 +1,5 @@
 package io.switstack.switcloud.switcloud_l2_demo.ui.theme
 
-import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
@@ -15,6 +14,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import io.switstack.switcloud.switcloud_l2_demo.utils.findActivity
 
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -110,11 +110,14 @@ fun Switcloudl2demoktTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = Color.Transparent.toArgb()
-            window.navigationBarColor = Color.Transparent.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !useDarkTheme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !useDarkTheme
+            val activity = view.context.findActivity()
+            if (activity != null) {
+                val window = activity.window
+                window.statusBarColor = Color.Transparent.toArgb()
+                window.navigationBarColor = Color.Transparent.toArgb()
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !useDarkTheme
+                WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !useDarkTheme
+            }
         }
     }
 

@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +43,7 @@ import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum.Companion.fromTag
 import io.switstack.switcloud.switcloud_l2_demo.data.OPSVerdictEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
+import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
@@ -51,6 +53,8 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getOPSV
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getOPSVerdictLabel
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getTagLabel
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getValueLabel
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.isCompactDevice
@@ -62,17 +66,38 @@ fun PaymentTicketScreen(success: Boolean,
                         tlvStream: String?,
                         onBackToPreviousClick: () -> Unit
 ) {
+    val secondaryDisplayManager = LocalSecondaryDisplayManager.current
     val tlvEntries = TlvUtils.parseTlvString(tlvStream?.uppercase())
     val transactionCounter = SharedPrefUtils(LocalContext.current).getTransactionCounter()
 
-    PaymentTicketScreenContent(tlvEntries,
-                               success,
-                               transactionCounter,
-                               onBackToPreviousClick)
+    PaymentTicketScreenContent(
+        tlvEntries,
+        shouldDisplayBackAction = true,
+        shouldDisplayFooter = true,
+        success = success,
+        transactionCounter = transactionCounter,
+        onBackToPreviousClick = onBackToPreviousClick)
+
+
+    if (getFlavorTarget() == FlavorTargetEnum.SUNMI) {
+        LaunchedEffect(Unit) {
+            secondaryDisplayManager?.show {
+                PaymentTicketScreenContent(
+                    tlvEntries,
+                    shouldDisplayBackAction = false,
+                    shouldDisplayFooter = false,
+                    success = success,
+                    transactionCounter = transactionCounter,
+                    onBackToPreviousClick = onBackToPreviousClick)
+            }
+        }
+    }
 }
 
 @Composable
 fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
+                               shouldDisplayBackAction: Boolean,
+                               shouldDisplayFooter: Boolean,
                                success: Boolean,
                                transactionCounter: Int,
                                onBackToPreviousClick: () -> Unit
@@ -112,8 +137,9 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Spacer(modifier = Modifier.heightIn(max = 60.dp))
-                Column(modifier = Modifier.weight(1f)
-                        .verticalScroll(rememberScrollState()),
+                Column(modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Surface(
@@ -162,15 +188,19 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                         }
                     }
                 }
-                Action(
-                    buttonText = stringResource(R.string.back_to_previous),
-                    buttonType = ButtonType.Elevated,
-                    buttonColors = ButtonDefaults.elevatedButtonColors().copy(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    onClick = onBackToPreviousClick)
-                Footer()
+                if(shouldDisplayBackAction) {
+                    Action(
+                        buttonText = stringResource(R.string.back_to_previous),
+                        buttonType = ButtonType.Elevated,
+                        buttonColors = ButtonDefaults.elevatedButtonColors().copy(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        onClick = onBackToPreviousClick)
+                }
+                if(shouldDisplayFooter) {
+                    Footer()
+                }
             }
         }
     }
@@ -211,6 +241,6 @@ private val sampleTlv = listOf(
 @Composable
 fun PaymentTicketScreenSuccessPreview() {
     Switcloudl2demoktTheme {
-        PaymentTicketScreenContent(sampleTlv, true, 123) { }
+        PaymentTicketScreenContent(sampleTlv, true, true, true, 123) { }
     }
 }
