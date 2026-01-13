@@ -5,11 +5,11 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.core.view.WindowCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var secondaryDisplayManager: SecondaryDisplayManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         secondaryDisplayManager = SecondaryDisplayManager(this)
 
@@ -38,10 +39,6 @@ class MainActivity : AppCompatActivity() {
             println("${Build.BRAND} ${Build.PRODUCT}")
             println("${Build.BRAND.uppercase()}_${Build.PRODUCT.uppercase()}")
         }
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        val inserts = WindowCompat.getInsetsController(window, window.decorView)
-        inserts.hide(android.view.WindowInsets.Type.systemBars())
 
         paymentViewModel.setupSwitcloudL2(this)
         setContent {

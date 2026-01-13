@@ -2,7 +2,6 @@
 .gradle
 /local.properties
 .DS_Store
-/build
 /captures
 .externalNativeBuild
 .cxx
@@ -39,7 +38,6 @@ output-metadata.json
 signing-config.json
 
 # Local configuration files (should not be shared)
-local.properties
 .gradle/
 c.gradle/
 /captures/
@@ -63,7 +61,6 @@ c.gradle/
 .idea/vcs.xml
 .idea/caches/deviceStreaming.xml
 .idea/inspectionProfiles/Project_Default.xml
-*.iml
 *.ipr
 *.iws
 

@@ -5,7 +5,7 @@ import io.switstack.switcloud.switcloudapi.model.EMVCreateSchema
 
 data class EmvMultiScheme(
 
-    @Json(name = "emvs")
+    @field:Json(name = "emvs")
     val emvs: Map<String, EMVCreateSchema>
 
 )

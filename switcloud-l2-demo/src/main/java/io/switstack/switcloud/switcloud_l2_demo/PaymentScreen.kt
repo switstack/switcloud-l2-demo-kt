@@ -69,7 +69,7 @@ fun PaymentScreen(
 
     val secondaryDisplayManager = LocalSecondaryDisplayManager.current
 
-    val shouldDisplayNfcLogo = getFlavorTarget() != null
+    val shouldDisplayNfcLogo = FlavorTargetEnum.entries.contains(getFlavorTarget())
 
     val shouldDisplayNfcOnPrimaryScreen = shouldDisplayNfcLogo && secondaryDisplayManager?.secondaryDisplayExists() == false
 
