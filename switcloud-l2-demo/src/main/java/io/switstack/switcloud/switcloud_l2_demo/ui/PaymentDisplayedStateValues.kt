@@ -10,9 +10,8 @@ data class PaymentDisplayedStateValues(
     val colorTint: Color?
 ) {
     class ImageConfig(
-            val drawable: Int,
-            val width: Dp,
-            val contentDescription: String
+        val drawable: Int,
+        val width: Dp,
+        val contentDescription: String
     )
-
 }

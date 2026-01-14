@@ -11,9 +11,9 @@ import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.OPSVerdictEnum
 import io.switstack.switcloud.switcloud_l2_demo.utils.ByteArrayHexStringUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvConfig
-import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getErrorIndication
-import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getOPSStatus
-import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getOPSVerdict
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getErrorIndication
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getOPSStatus
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getOPSVerdict
 import io.switstack.switcloud.switcloud_l2_demo.utils.MokaConfig
 import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
@@ -53,7 +53,6 @@ class PaymentViewModel() : ViewModel() {
             // Setting reference to switcloud components
             glase = switcloudL2.glase()
             reader = switcloudL2.reader()
-
         } catch (e: Exception) {
             println("Initialization failed: ${e.message}")
             _uiState.update {
@@ -115,7 +114,6 @@ class PaymentViewModel() : ViewModel() {
             }
 
             return emvMultiSchemeData?.emvs?.values?.toList()
-
         } catch (e: Exception) {
             _uiState.update {
                 it.copy(errorMessageResource = R.string.error_loading_emv_config)
@@ -135,7 +133,6 @@ class PaymentViewModel() : ViewModel() {
             }
 
             return capkMultiSchemeData?.capks?.values?.toList()
-
         } catch (e: Exception) {
             _uiState.update {
                 it.copy(errorMessageResource = R.string.error_loading_capks)
@@ -143,7 +140,6 @@ class PaymentViewModel() : ViewModel() {
             return null
         }
     }
-
 
     fun processPayment(amount: String) {
         // Guard clause to prevent processing before initialization is complete.
@@ -168,39 +164,42 @@ class PaymentViewModel() : ViewModel() {
 
             try {
                 val preProcessingResult = glase.preProcessing(trd)
-                if (!preProcessingResult.second)
+                if (!preProcessingResult.second) {
                     _uiState.update {
                         it.copy(errorMessageResource = R.string.error_pre_processing)
                     }
+                }
 
                 val card = glase.protocolActivation(null)
-                if (card != CardInterfaceType.CARD_INTERFACE_TYPE_CONTACTLESS)
+                if (card != CardInterfaceType.CARD_INTERFACE_TYPE_CONTACTLESS) {
                     _uiState.update {
                         it.copy(errorMessageResource = R.string.error_card_detection)
                     }
+                }
 
                 val combinationSelectionResult = glase.combinationSelection()
-                if (!combinationSelectionResult.second)
+                if (!combinationSelectionResult.second) {
                     _uiState.update {
                         it.copy(errorMessageResource = R.string.error_combination_selection)
                     }
+                }
 
                 glase.kernelActivation(null)
 
                 // Items to show on ticket
                 val ticketTags = listOf(
-                    EmvTagEnum.TAG_9C,      //TT
-                    EmvTagEnum.TAG_9A,      //Data
-                    EmvTagEnum.TAG_9F02,    //Amount
-                    EmvTagEnum.TAG_DF8129,   //OPS MASTERCARD
-                    EmvTagEnum.TAG_9F8210,   //OPS C8
-                    EmvTagEnum.TAG_4F,      //AID
-                    EmvTagEnum.TAG_5F20,      //Cardholder Name
-                    EmvTagEnum.TAG_84,      //DF_Name
-                    EmvTagEnum.TAG_50,      //Application_label
-                    EmvTagEnum.TAG_5A,      //PAN
-                    EmvTagEnum.TAG_9F27,    //CID
-                    EmvTagEnum.TAG_95      //TVR
+                    EmvTagEnum.TAG_9C, // TT
+                    EmvTagEnum.TAG_9A, // Data
+                    EmvTagEnum.TAG_9F02, // Amount
+                    EmvTagEnum.TAG_DF8129, // OPS MASTERCARD
+                    EmvTagEnum.TAG_9F8210, // OPS C8
+                    EmvTagEnum.TAG_4F, // AID
+                    EmvTagEnum.TAG_5F20, // Cardholder Name
+                    EmvTagEnum.TAG_84, // DF_Name
+                    EmvTagEnum.TAG_50, // Application_label
+                    EmvTagEnum.TAG_5A, // PAN
+                    EmvTagEnum.TAG_9F27, // CID
+                    EmvTagEnum.TAG_95 // TVR
                 )
 
                 var ticketData: ByteArray = byteArrayOf()
@@ -213,11 +212,11 @@ class PaymentViewModel() : ViewModel() {
 
                             if (tag == EmvTagEnum.TAG_DF8129 || tag == EmvTagEnum.TAG_9F8210) {
                                 val opsHexString = ByteArrayHexStringUtils.byteArrayToHexString(value)
-                                val OPSTlvEntry = TlvUtils.parseTlvString(opsHexString).single()
-                                when (getOPSVerdict(OPSTlvEntry.value)) {
-                                    OPSVerdictEnum.APPROVED     -> success = true
+                                val opsTlvEntry = TlvUtils.parseTlvString(opsHexString).single()
+                                when (getOPSVerdict(opsTlvEntry.value)) {
+                                    OPSVerdictEnum.APPROVED -> success = true
                                     OPSVerdictEnum.PIN_REQUIRED -> pinEntryRequired = true
-                                    OPSVerdictEnum.DECLINED     -> success = false
+                                    OPSVerdictEnum.DECLINED -> success = false
                                 }
                             }
                         }
@@ -228,27 +227,30 @@ class PaymentViewModel() : ViewModel() {
                 }
 
                 // Managing OPS status and Error indication when declined status
-                if(!success && !pinEntryRequired) {
+                if (!success && !pinEntryRequired) {
                     var errorMessage = ""
-                    val opsStatusAndErrorIndicationTags = listOf(EmvTagEnum.TAG_DF8129, EmvTagEnum.TAG_9F8210,EmvTagEnum.TAG_DF8115)
+                    val opsStatusAndErrorIndicationTags = listOf(EmvTagEnum.TAG_DF8129, EmvTagEnum.TAG_9F8210, EmvTagEnum.TAG_DF8115)
 
                     for (tag in opsStatusAndErrorIndicationTags) {
                         try {
                             glase.getTag(ByteArrayHexStringUtils.hexStringToByteArray(tag.hexTag))?.let { value ->
                                 val hexString = ByteArrayHexStringUtils.byteArrayToHexString(value)
                                 val tlvEntry = TlvUtils.parseTlvString(hexString).single()
-                                when(tag) {
+                                when (tag) {
                                     EmvTagEnum.TAG_DF8129,
                                     EmvTagEnum.TAG_9F8210 -> {
-
                                         getOPSStatus(tlvEntry.value)?.let { errorMessage += it }
                                     }
+
                                     EmvTagEnum.TAG_DF8115 -> {
                                         getErrorIndication(tlvEntry.value)?.let {
                                             errorMessage += " ($it)"
                                         }
                                     }
-                                    else                  -> { /* should not happened because TAGS are defined by opsStatusAndErrorIndicationTags */ }
+
+                                    else -> {
+                                        /* should not happened because TAGS are defined by opsStatusAndErrorIndicationTags */
+                                    }
                                 }
                             }
                         } catch (e: SwitcloudL2NotFoundException) {
@@ -264,12 +266,12 @@ class PaymentViewModel() : ViewModel() {
                 val tlvString = ByteArrayHexStringUtils.byteArrayToHexString(ticketData)
 
                 _uiState.update {
-                    if (pinEntryRequired)
+                    if (pinEntryRequired) {
                         it.copy(showPinEntry = true, tlvString = tlvString)
-                    else
+                    } else {
                         it.copy(success = success, tlvString = tlvString)
+                    }
                 }
-
             } catch (e: SwitcloudL2TimeoutException) {
                 _uiState.update {
                     it.copy(errorMessageResource = R.string.error_timeout)
@@ -386,7 +388,6 @@ class PaymentViewModel() : ViewModel() {
             add(0x36.toByte()) // Tag 5F36 (second byte)
             add(0x01.toByte()) // Length 01
             add(0x02.toByte()) // Value exponent
-
         }.toByteArray()
     }
 }

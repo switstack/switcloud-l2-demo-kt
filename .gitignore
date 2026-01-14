@@ -1,9 +1,7 @@
 *.iml
 .gradle
 /local.properties
-/.idea
 .DS_Store
-/build
 /captures
 .externalNativeBuild
 .cxx
@@ -23,6 +21,7 @@ venv
 /build
 /app/build
 /switcloud-l2-demo/build
+/switcloud-l2-demo/reports
 
 # Generated APKs, AABs, and other build outputs
 *.apk
@@ -39,16 +38,29 @@ output-metadata.json
 signing-config.json
 
 # Local configuration files (should not be shared)
-local.properties
 .gradle/
 c.gradle/
 /captures/
 
-# IDE-specific files
-.idea/
+# IDE-specific files (adding all to keep codeStyles/Project.xml)
 .idea/workspace.xml
 .idea/libraries/
-*.iml
+.idea/.gitignore
+.idea/.name
+.idea/AndroidProjectSystem.xml
+.idea/assetWizardSettings.xml
+.idea/compiler.xml
+.idea/deploymentTargetSelector.xml
+.idea/deviceManager.xml
+.idea/gradle.xml
+.idea/markdown.xml
+.idea/migrations.xml
+.idea/misc.xml
+.idea/runConfigurations.xml
+.idea/studiobot.xml
+.idea/vcs.xml
+.idea/caches/deviceStreaming.xml
+.idea/inspectionProfiles/Project_Default.xml
 *.ipr
 *.iws
 

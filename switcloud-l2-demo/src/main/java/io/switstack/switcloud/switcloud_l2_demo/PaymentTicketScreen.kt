@@ -44,15 +44,16 @@ import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum.Companion.fromTa
 import io.switstack.switcloud.switcloud_l2_demo.data.OPSVerdictEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
 import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
+import io.switstack.switcloud.switcloud_l2_demo.ui.ButtonType
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
 import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_onSurface
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_surface
-import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getOPSVerdict
-import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getOPSVerdictLabel
-import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getTagLabel
-import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.Companion.getValueLabel
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getOPSVerdict
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getOPSVerdictLabel
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getTagLabel
+import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getValueLabel
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
@@ -62,9 +63,10 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallSquareScreen
 import kotlin.random.Random
 
 @Composable
-fun PaymentTicketScreen(success: Boolean,
-                        tlvStream: String?,
-                        onBackToPreviousClick: () -> Unit
+fun PaymentTicketScreen(
+    success: Boolean,
+    tlvStream: String?,
+    onBackToPreviousClick: () -> Unit
 ) {
     val secondaryDisplayManager = LocalSecondaryDisplayManager.current
     val tlvEntries = TlvUtils.parseTlvString(tlvStream?.uppercase())
@@ -76,8 +78,8 @@ fun PaymentTicketScreen(success: Boolean,
         shouldDisplayFooter = true,
         success = success,
         transactionCounter = transactionCounter,
-        onBackToPreviousClick = onBackToPreviousClick)
-
+        onBackToPreviousClick = onBackToPreviousClick
+    )
 
     if (getFlavorTarget() == FlavorTargetEnum.SUNMI) {
         LaunchedEffect(Unit) {
@@ -88,26 +90,42 @@ fun PaymentTicketScreen(success: Boolean,
                     shouldDisplayFooter = false,
                     success = success,
                     transactionCounter = transactionCounter,
-                    onBackToPreviousClick = onBackToPreviousClick)
+                    onBackToPreviousClick = onBackToPreviousClick
+                )
             }
         }
     }
 }
 
 @Composable
-fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
-                               shouldDisplayBackAction: Boolean,
-                               shouldDisplayFooter: Boolean,
-                               success: Boolean,
-                               transactionCounter: Int,
-                               onBackToPreviousClick: () -> Unit
+fun PaymentTicketScreenContent(
+    tlvEntries: List<TlvEntry>,
+    shouldDisplayBackAction: Boolean,
+    shouldDisplayFooter: Boolean,
+    success: Boolean,
+    transactionCounter: Int,
+    onBackToPreviousClick: () -> Unit
 ) {
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val isSmallSquareScreen = isSmallSquareScreen()
     val config = when {
-        isSmallSquareScreen -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.05f, MaterialTheme.typography.displayLarge)
-        isLandscape         -> PaymentDisplayConfig(R.drawable.bg_payment_land, 0.10f, MaterialTheme.typography.displayLarge)
-        else                -> PaymentDisplayConfig(R.drawable.bg_payment_port, 0.12f, MaterialTheme.typography.displaySmall)
+        isSmallSquareScreen -> PaymentDisplayConfig(
+            R.drawable.bg_payment_land,
+            0.05f,
+            MaterialTheme.typography.displayLarge
+        )
+
+        isLandscape -> PaymentDisplayConfig(
+            R.drawable.bg_payment_land,
+            0.10f,
+            MaterialTheme.typography.displayLarge
+        )
+
+        else -> PaymentDisplayConfig(
+            R.drawable.bg_payment_port,
+            0.12f,
+            MaterialTheme.typography.displaySmall
+        )
     }
 
     val ticketTextStyle = TextStyle(
@@ -121,13 +139,15 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillHeight,
             painter = painterResource(config.backgroundResource),
-            contentDescription = "Payment background")
+            contentDescription = "Payment background"
+        )
 
         Column {
             Box(
                 modifier = Modifier
                     .fillMaxHeight(config.headerPercent)
-                    .fillMaxWidth())
+                    .fillMaxWidth()
+            )
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -137,9 +157,10 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Spacer(modifier = Modifier.heightIn(max = 60.dp))
-                Column(modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Surface(
@@ -161,7 +182,11 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                             )
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            tlvEntriesToMap(tlvEntries, transactionCounter, success).forEach { entry ->
+                            tlvEntriesToMap(
+                                tlvEntries,
+                                transactionCounter,
+                                success
+                            ).forEach { entry ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -188,7 +213,7 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                         }
                     }
                 }
-                if(shouldDisplayBackAction) {
+                if (shouldDisplayBackAction) {
                     Action(
                         buttonText = stringResource(R.string.back_to_previous),
                         buttonType = ButtonType.Elevated,
@@ -196,9 +221,10 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
                             containerColor = MaterialTheme.colorScheme.surfaceVariant,
                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                         ),
-                        onClick = onBackToPreviousClick)
+                        onClick = onBackToPreviousClick
+                    )
                 }
-                if(shouldDisplayFooter) {
+                if (shouldDisplayFooter) {
                     Footer()
                 }
             }
@@ -206,16 +232,21 @@ fun PaymentTicketScreenContent(tlvEntries: List<TlvEntry>,
     }
 }
 
-private fun tlvEntriesToMap(tlvEntries: List<TlvEntry>, transactionCounter: Int, success: Boolean): Map<String, String> =
+private fun tlvEntriesToMap(
+    tlvEntries: List<TlvEntry>,
+    transactionCounter: Int,
+    success: Boolean
+): Map<String, String> =
     tlvEntries.map { entry ->
-        when(fromTag(entry.tag.uppercase())) {
+        when (fromTag(entry.tag.uppercase())) {
             EmvTagEnum.TAG_DF8129, EmvTagEnum.TAG_9F8210 -> {
-                if(getOPSVerdict(entry.value) == OPSVerdictEnum.PIN_REQUIRED) {
+                if (getOPSVerdict(entry.value) == OPSVerdictEnum.PIN_REQUIRED) {
                     getTagLabel(entry.tag) to getOPSVerdictLabel(success)
                 } else {
                     getTagLabel(entry.tag) to getValueLabel(entry.tag, entry.value)
                 }
             }
+
             else -> getTagLabel(entry.tag) to getValueLabel(entry.tag, entry.value)
         }
     }.toMutableList().apply {

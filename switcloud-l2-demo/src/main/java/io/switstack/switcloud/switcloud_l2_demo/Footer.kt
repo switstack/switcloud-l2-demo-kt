@@ -39,26 +39,30 @@ fun Footer(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .weight(1f)
                 .padding(start = 5.dp, end = 10.dp),
-            painter = painterResource(id = when(getFlavorTarget()) {
-                FlavorTargetEnum.QUALCOMM -> R.drawable.ic_dragonwing
-                FlavorTargetEnum.SUNMI    -> R.drawable.ic_sunmi
-                FlavorTargetEnum.FLYTECH  -> R.drawable.ic_flytech
-                FlavorTargetEnum.NEWLAND  -> R.drawable.ic_newland
-            }),
+            painter = painterResource(
+                id = when (getFlavorTarget()) {
+                    FlavorTargetEnum.QUALCOMM -> R.drawable.ic_dragonwing
+                    FlavorTargetEnum.SUNMI -> R.drawable.ic_sunmi
+                    FlavorTargetEnum.FLYTECH -> R.drawable.ic_flytech
+                    FlavorTargetEnum.NEWLAND -> R.drawable.ic_newland
+                }
+            ),
             contentDescription = "Brand Logo",
             alignment = Alignment.Center,
             contentScale = if (isLandscape) ContentScale.FillHeight else ContentScale.FillWidth,
-            colorFilter = if (isSystemInDarkTheme())
-            // using contrasted color with background
+            colorFilter = if (isSystemInDarkTheme()) {
+                // using contrasted color with background
                 ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
-            else {
+            } else {
                 // using default color on brand logos
-                ColorFilter.tint(when(getFlavorTarget()) {
-                    FlavorTargetEnum.QUALCOMM -> Color(0xFF31017D)
-                    FlavorTargetEnum.SUNMI    -> Color(0xFFFF6801)
-                    FlavorTargetEnum.FLYTECH  -> Color(0xFF0081C6)
-                    FlavorTargetEnum.NEWLAND  -> Color(0xFF164A85)
-                })
+                ColorFilter.tint(
+                    when (getFlavorTarget()) {
+                        FlavorTargetEnum.QUALCOMM -> Color(0xFF31017D)
+                        FlavorTargetEnum.SUNMI -> Color(0xFFFF6801)
+                        FlavorTargetEnum.FLYTECH -> Color(0xFF0081C6)
+                        FlavorTargetEnum.NEWLAND -> Color(0xFF164A85)
+                    }
+                )
             }
         )
 
@@ -67,26 +71,28 @@ fun Footer(modifier: Modifier = Modifier) {
                 .weight(1f)
                 .padding(horizontal = 5.dp),
             painter = painterResource(
-                id = if (isSystemInDarkTheme())
+                id = if (isSystemInDarkTheme()) {
                     R.drawable.ic_switstack_dark
-                else
+                } else {
                     R.drawable.ic_switstack_light
+                }
             ),
             contentDescription = "Switstack Logo",
             contentScale = ContentScale.Fit
         )
 
-        when(getFlavorTarget()) {
+        when (getFlavorTarget()) {
             FlavorTargetEnum.QUALCOMM -> {
-                 Image(
-                     modifier = Modifier
-                         .weight(1f)
-                         .padding(start = 10.dp, end = 5.dp),
+                Image(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 10.dp, end = 5.dp),
                     painter = painterResource(id = R.drawable.ic_oona),
                     contentDescription = "Oona Logo",
                     contentScale = ContentScale.Fit
-                 )
+                )
             }
+
             FlavorTargetEnum.SUNMI -> {
                 Image(
                     modifier = Modifier
@@ -95,15 +101,16 @@ fun Footer(modifier: Modifier = Modifier) {
                     painter = painterResource(id = R.drawable.ic_dragonwing),
                     contentDescription = "Qualcomm Logo",
                     contentScale = if (isLandscape) ContentScale.FillHeight else ContentScale.FillWidth,
-                    colorFilter = if (isSystemInDarkTheme())
+                    colorFilter = if (isSystemInDarkTheme()) {
                         // using contrasted color with background
                         ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
-                    else {
+                    } else {
                         ColorFilter.tint(Color(0xFF31017D))
                     }
                 )
             }
-             else -> {}
+
+            else -> {}
         }
     }
 }

@@ -8,7 +8,6 @@ class SwitcloudL2DemoException : RuntimeException {
     constructor(cause: Throwable) : super(cause)
 
     fun makeMessage(message: String, cause: Throwable): String {
-
         return "$message: ${cause.message}"
     }
 }

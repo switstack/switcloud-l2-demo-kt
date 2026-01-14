@@ -1,3 +1,5 @@
+import io.gitlab.arturbosch.detekt.Detekt
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -101,11 +103,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "21"
     }
 }
 
@@ -156,11 +158,20 @@ dependencies {
 detekt {
     autoCorrect = true
     toolVersion = "1.23.8"
-    source.setFrom("src/main/kotlin/")
+    source.setFrom("src/main/java/")
     config.setFrom("../conf/detekt/detekt.yml")
     buildUponDefaultConfig = true
     basePath = projectDir.absolutePath
     debug = false
+}
+
+tasks.withType<Detekt>().configureEach {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        xml.outputLocation.set(file("build/reports/detekt.xml"))
+        html.outputLocation.set(file("build/reports/detekt.html"))
+    }
 }
 
 dependencies {
