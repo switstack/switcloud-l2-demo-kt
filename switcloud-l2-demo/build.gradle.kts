@@ -148,9 +148,9 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 
-    /* Local AAR */
-    implementation(files("libs/switcloud-l2-mokastd-debug.aar"))
-    implementation(files("libs/switcloud-api-kt-release.aar"))
+    /* Switstack's deps */
+    implementation("io.switstack.switcloud:switcloud-l2-kt:1.1.0")
+    implementation("io.switstack.switcloud:switcloud-api-kt:2.28.0")
 }
 
 /* Detekt --------------------------------------------------------------------------------------- */
