@@ -1,5 +1,6 @@
 # Commands
 AWK ?= awk
+ECHO ?= echo
 GET_NEXT_VERSION ?= get-next-version
 GRADLE ?= ./gradlew
 GREP ?= grep
@@ -7,6 +8,13 @@ MKDIR ?= mkdir
 MV ?= mv
 RM ?= rm
 SORT ?= sort
+
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+	SED := sed -i ''
+else
+	SED := sed -i
+endif
 
 PROJECT = switcloud-l2-demo
 
@@ -103,6 +111,10 @@ publish-artifact: ## Publish main artifact
 
 .PHONY: set-version
 set-version: ## Version update
+	@version=$$($(GET_NEXT_VERSION)); \
+	$(SED) -E "s/(versionName = )\".*\"/\1\"$$version\"/" $(PROJECT)/build.gradle.kts
 
 .PHONY: get-version
 get-version: ## Read current version
+	@version=$$(grep "versionName =" $(PROJECT)/build.gradle.kts | sed -E 's/.*versionName = "(.*)"/\1/'); \
+    $(ECHO) "$$version"
