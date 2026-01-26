@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">switcloud-l2-demo</string>
+    <string name="pay">Pay</string>
+    <string name="preference_file_key">io.switstack.switcloud.switcloud_l2_demo.PREFERENCE_FILE_KEY</string>
+    <string name="transaction_counter_key">io.switstack.switcloud.switcloud_l2_demo.transaction_counter_key</string>
+    <string name="back_to_previous">Back</string>
+    <string name="enter_your_pin">Enter your PIN</string>
+    <string name="customer_pin_entry">Customer PIN entry</string>
+    <string name="cancel">Cancel</string>
+    <string name="success">Success</string>
+    <string name="declined">Declined</string>
+    <string name="enter_amount">Please enter amount</string>
+    <string name="select_amount">Please select amount</string>
+    <string name="present_card">Present card</string>
+    <string name="loading">Loading in progress...</string>
+    <string name="payment_receipt">Payment Receipt</string>
+    <string name="proceed_payment">Proceed with payment</string>
+
+    <string name="error_loading_emv_config">Failed to load EMV Config</string>
+    <string name="error_loading_capks">Failed to load CAPK list</string>
+    <string name="error_timeout">Card detection timeout</string>
+    <string name="error_failure">Failure</string>
+    <string name="error_pre_processing">Pre-processing failed</string>
+    <string name="error_card_detection">Card detection error</string>
+    <string name="error_combination_selection">Combination selection failed</string>
+    <string name="error_not_ready">SwitCloudL2 is not ready</string>
+    <string name="error_user_cancelled">User cancelled</string>
+    <string name="error_init_failed">Initialization failed</string>
+    <string name="error_empty_candidate_list">Empty candidate list</string>
+    <string name="error_no_selected_combination">No selected combination</string>
+</resources>
