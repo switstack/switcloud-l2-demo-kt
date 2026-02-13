@@ -111,6 +111,7 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
                     text = stringResource(if (isSmallSquareScreen) R.string.select_amount else R.string.enter_amount),
                     color = MaterialTheme.colorScheme.onPrimary,
                     autoSize = TextAutoSize.StepBased(maxFontSize = config.headerTextStyle.fontSize),
+                    maxLines = 1,
                     style = config.headerTextStyle
                 )
             }

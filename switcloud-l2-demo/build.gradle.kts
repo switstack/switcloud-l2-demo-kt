@@ -76,6 +76,12 @@ android {
             versionNameSuffix = "-newland"
             resValue("string", "app_name", "Switcloud L2 Demo Newland")
         }
+        create("authsignal") {
+            dimension = "target"
+            applicationIdSuffix = ".authsignal"
+            versionNameSuffix = "-authsignal"
+            resValue("string", "app_name", "Switcloud L2 Demo Authsignal")
+        }
         create("standalone") {
             dimension = "mode"
         }
@@ -95,8 +101,9 @@ android {
             val isConnectedFlytech = (mode == "connected" && target == "flytech")
             val isConnectedSunmi = (mode == "connected" && target == "sunmi")
             val isConnectedNewland = (mode == "connected" && target == "newland")
+            val isConnectedAuthsignal = (mode == "connected" && target == "authsignal")
 
-            if (isConnectedFlytech || isConnectedSunmi || isConnectedNewland) {
+            if (isConnectedFlytech || isConnectedSunmi || isConnectedNewland || isConnectedAuthsignal) {
                 variantBuilder.enable = false
             }
         }

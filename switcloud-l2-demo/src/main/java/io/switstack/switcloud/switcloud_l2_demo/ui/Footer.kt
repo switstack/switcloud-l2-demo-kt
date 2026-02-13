@@ -46,6 +46,7 @@ fun Footer(modifier: Modifier = Modifier) {
                     FlavorTargetEnum.SUNMI -> R.drawable.ic_sunmi
                     FlavorTargetEnum.FLYTECH -> R.drawable.ic_flytech
                     FlavorTargetEnum.NEWLAND -> R.drawable.ic_newland
+                    FlavorTargetEnum.AUTHSIGNAL -> R.drawable.ic_authsignal
                 }
             ),
             contentDescription = "Brand Logo",
@@ -62,6 +63,7 @@ fun Footer(modifier: Modifier = Modifier) {
                         FlavorTargetEnum.SUNMI -> Color(0xFFFF6801)
                         FlavorTargetEnum.FLYTECH -> Color(0xFF0081C6)
                         FlavorTargetEnum.NEWLAND -> Color(0xFF164A85)
+                        FlavorTargetEnum.AUTHSIGNAL -> Color(0xFF000000)
                     }
                 )
             }
