@@ -11,6 +11,7 @@ import io.switstack.switcloud.switcloudapi.model.CAPKCreateSchema
 import io.switstack.switcloud.switcloudapi.model.EMVCreateSchema
 import io.switstack.switcloud.switcloudapi.model.EMVTransactionType
 import okio.IOException
+import org.openapitools.client.infrastructure.LocalDateAdapter
 import org.openapitools.client.infrastructure.UUIDAdapter
 
 object TlvUtils {
@@ -19,6 +20,7 @@ object TlvUtils {
         Moshi.Builder()
             .add(UUIDAdapter())
             .add(KotlinJsonAdapterFactory())
+            .add(LocalDateAdapter())
             .build()
     }
 
