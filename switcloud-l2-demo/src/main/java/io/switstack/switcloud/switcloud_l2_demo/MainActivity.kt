@@ -17,11 +17,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
 import io.switstack.switcloud.switcloud_l2_demo.secondary_display.SecondaryDisplayManager
+import io.switstack.switcloud.switcloud_l2_demo.ui.AmountEntryScreen
+import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentScreen
+import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentTicketScreen
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
+import io.switstack.switcloud.switcloud_l2_demo.ui.PinEntryScreen
+import io.switstack.switcloud.switcloud_l2_demo.ui.ShoppingCartScreen
+import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorModeEnum.CONNECTED
+import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorModeEnum.STANDALONE
+import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorTargetEnum.QUALCOMM
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorModeEnum.CONNECTED
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorModeEnum.STANDALONE
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum.QUALCOMM
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorMode
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 

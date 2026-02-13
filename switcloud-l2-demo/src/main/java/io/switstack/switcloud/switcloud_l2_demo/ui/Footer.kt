@@ -1,4 +1,4 @@
-package io.switstack.switcloud.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -20,8 +20,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.switstack.switcloud.switcloud_l2_demo.R
+import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 
 @Composable

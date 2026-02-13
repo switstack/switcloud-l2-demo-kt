@@ -18,5 +18,6 @@ fun isSmallSquareScreen() = with(LocalConfiguration.current) {
     screenWidthDp.dp == screenHeightDp.dp && screenHeightDp == 480
 }
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 fun isSmallHeightScreen() = LocalConfiguration.current.screenHeightDp.dp < 600.dp

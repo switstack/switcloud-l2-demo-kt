@@ -1,4 +1,4 @@
-package io.switstack.switcloud.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -34,8 +34,7 @@ import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.switstack.switcloud.switcloud_l2_demo.ui.ButtonType
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
+import io.switstack.switcloud.switcloud_l2_demo.R
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_onSurface
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_surface
