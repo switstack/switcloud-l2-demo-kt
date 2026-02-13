@@ -1,4 +1,4 @@
-package io.switstack.switcloud.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -47,12 +47,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.switstack.switcloud.switcloud_l2_demo.R
 import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
-import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
+import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallHeightScreen
 

@@ -1,4 +1,4 @@
-package io.switstack.switcloud.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -39,14 +39,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.switstack.switcloud.switcloud_l2_demo.R
 import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum.Companion.fromTag
 import io.switstack.switcloud.switcloud_l2_demo.data.OPSVerdictEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
 import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
-import io.switstack.switcloud.switcloud_l2_demo.ui.ButtonType
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
-import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
+import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_onSurface
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.md_theme_light_surface
@@ -54,7 +53,6 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getOPSVerdict
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getOPSVerdictLabel
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getTagLabel
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getValueLabel
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils

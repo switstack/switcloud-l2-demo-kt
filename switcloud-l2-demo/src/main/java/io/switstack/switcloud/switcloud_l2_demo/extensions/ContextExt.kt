@@ -1,4 +1,4 @@
-package io.switstack.switcloud.switcloud_l2_demo.utils
+package io.switstack.switcloud.switcloud_l2_demo.extensions
 
 import android.app.Activity
 import android.content.Context

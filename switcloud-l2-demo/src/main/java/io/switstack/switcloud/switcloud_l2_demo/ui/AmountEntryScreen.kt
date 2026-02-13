@@ -1,4 +1,4 @@
-package io.switstack.switcloud.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Image
@@ -44,13 +44,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
+import io.switstack.switcloud.switcloud_l2_demo.R
 import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
 import io.switstack.switcloud.switcloud_l2_demo.secondary_display.SunmiBrandsScreen
-import io.switstack.switcloud.switcloud_l2_demo.ui.ButtonType
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
-import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
+import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 import io.switstack.switcloud.switcloud_l2_demo.utils.isCompactDevice
 import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallSquareScreen
