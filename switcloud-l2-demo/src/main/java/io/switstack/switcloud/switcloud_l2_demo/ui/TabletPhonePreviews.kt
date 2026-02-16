@@ -35,4 +35,11 @@ import androidx.compose.ui.tooling.preview.Preview
     widthDp = 800,
     heightDp = 480
 )
+@Preview(
+    name = "AuthSignal screen",
+    group = "Phone",
+    device = PHONE,
+    widthDp = 360,
+    heightDp = 800
+)
 annotation class TabletPhonePreviews
