@@ -16,17 +16,37 @@ permissions:
   pull-requests: write
   issues: write
   id-token: write
-  security-events: read
 
 jobs:
   renovate:
     if: github.event_name != 'pull_request' || startsWith(github.event.pull_request.head.ref, 'renovate/')
-    uses: switstack/switstack-reusables-workflows/.github/workflows/renovate.yml@main
-    with:
-      setup-vpn: true
-      setup-nexus: true
-      java-version: '21'
-      log-level: 'info'
-      renovate-version: 'latest'
-    secrets:
-      RENOVATE_TOKEN: ${{ secrets.RENOVATE_PAT_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Create Renovate Cache Directory
+        run: |
+          mkdir -p /tmp/renovate/cache
+          chmod 777 /tmp/renovate/cache
+
+      - name: Run Renovate
+        env:
+          LOG_LEVEL: info
+          RENOVATE_TOKEN: ${{ secrets.RENOVATE_PAT_TOKEN }}
+        run: |
+          docker run \
+            --rm \
+            --network host \
+            -e LOG_LEVEL="${LOG_LEVEL}" \
+            -e RENOVATE_REPOSITORIES="${{ github.repository }}" \
+            -e RENOVATE_TOKEN="${RENOVATE_TOKEN}" \
+            -v "$(pwd)/renovate.json:/usr/src/app/config.json:ro" \
+            -v "/tmp/renovate/cache:/tmp/renovate/cache:rw" \
+            ghcr.io/renovatebot/renovate:latest
