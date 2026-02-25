@@ -1,0 +1,104 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "enabledManagers": [
+    "github-actions",
+    "gradle"
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true
+  },
+  "rebaseWhen": "behind-base-branch",
+  "rebaseStalePrs": true,
+  "schedule": [
+    "before 8am"
+  ],
+  "packageRules": [
+    {
+      "description": "Regular updates (github-actions)",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "regular",
+      "groupSlug": "regular",
+      "matchPackageNames": [
+        "*"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchJsonata": [
+        "isVulnerabilityAlert != true"
+      ],
+      "labels": [
+        "dependencies",
+        "github-actions"
+      ],
+      "prConcurrentLimit": 10
+    },
+    {
+      "description": "Security updates (github-actions)",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "security",
+      "groupSlug": "security",
+      "matchPackageNames": [
+        "*"
+      ],
+      "matchJsonata": [
+        "isVulnerabilityAlert = true"
+      ],
+      "labels": [
+        "dependencies",
+        "security",
+        "github-actions"
+      ]
+    },
+    {
+      "description": "Regular updates (gradle)",
+      "matchManagers": [
+        "gradle"
+      ],
+      "groupName": "regular",
+      "groupSlug": "regular",
+      "matchPackageNames": [
+        "*"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchJsonata": [
+        "isVulnerabilityAlert != true"
+      ],
+      "labels": [
+        "dependencies",
+        "java"
+      ],
+      "prConcurrentLimit": 10
+    },
+    {
+      "description": "Security updates (gradle)",
+      "matchManagers": [
+        "gradle"
+      ],
+      "groupName": "security",
+      "groupSlug": "security",
+      "matchPackageNames": [
+        "*"
+      ],
+      "matchJsonata": [
+        "isVulnerabilityAlert = true"
+      ],
+      "labels": [
+        "dependencies",
+        "security",
+        "java"
+      ]
+    }
+  ],
+  "baseBranchPatterns": [
+    "develop"
+  ]
+}

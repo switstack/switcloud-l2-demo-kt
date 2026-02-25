@@ -1,0 +1,32 @@
+name: Renovate
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * *'
+  pull_request:
+    types: [edited]
+
+concurrency:
+  group: renovate-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+  security-events: read
+
+jobs:
+  renovate:
+    if: github.event_name != 'pull_request' || startsWith(github.event.pull_request.head.ref, 'renovate/')
+    uses: switstack/switstack-reusables-workflows/.github/workflows/renovate.yml@main
+    with:
+      setup-vpn: true
+      setup-nexus: true
+      java-version: '21'
+      log-level: 'info'
+      renovate-version: 'latest'
+    secrets:
+      RENOVATE_TOKEN: ${{ secrets.RENOVATE_PAT_TOKEN }}
