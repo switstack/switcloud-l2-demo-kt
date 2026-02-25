@@ -23,8 +23,8 @@ jobs:
     if: github.event_name != 'pull_request' || startsWith(github.event.pull_request.head.ref, 'renovate/')
     uses: switstack/switstack-reusables-workflows/.github/workflows/renovate.yml@main
     with:
-      setup-vpn: true
-      setup-nexus: true
+      setup-vpn: false
+      setup-nexus: false
       java-version: '21'
       log-level: 'info'
       renovate-version: 'latest'
