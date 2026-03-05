@@ -156,7 +156,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 
     /* Switstack's deps */
-    implementation("io.switstack.switcloud:switcloud-l2-kt:1.1.0")
+    implementation("io.switstack.switcloud:switcloud-l2-kt:1.2.0")
     implementation("io.switstack.switcloud:switcloud-api-kt:2.28.0")
 }
 
