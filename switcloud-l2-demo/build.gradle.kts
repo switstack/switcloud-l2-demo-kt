@@ -127,7 +127,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
-    implementation("androidx.fragment:fragment-ktx:1.5.6")
+    implementation("androidx.fragment:fragment-ktx:1.8.9")
     implementation("androidx.activity:activity-compose:1.8.0")
 
     // Compose
