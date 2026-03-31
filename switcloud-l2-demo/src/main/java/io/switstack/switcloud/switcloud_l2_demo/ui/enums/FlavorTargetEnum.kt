@@ -5,5 +5,6 @@ enum class FlavorTargetEnum {
     SUNMI,
     FLYTECH,
     NEWLAND,
-    AUTHSIGNAL
+    AUTHSIGNAL,
+    GENERIC
 }

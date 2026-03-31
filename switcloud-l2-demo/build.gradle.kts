@@ -50,7 +50,7 @@ android {
 
     flavorDimensions += "mode"
     flavorDimensions += "target"
-    flavorDimensions += "l2"
+    flavorDimensions += "nfcLogo"
 
     productFlavors {
         create("qualcomm") {
@@ -58,30 +58,40 @@ android {
             applicationIdSuffix = ".qcom"
             versionNameSuffix = "-qcom"
             resValue("string", "app_name", "Switcloud L2 Demo Qualcomm")
+            missingDimensionStrategy("l2", "mokastd")
         }
         create("sunmi") {
             dimension = "target"
             applicationIdSuffix = ".sunmi"
             versionNameSuffix = "-sunmi"
             resValue("string", "app_name", "Switcloud L2 Demo Sunmi")
+            missingDimensionStrategy("l2", "mokastd")
         }
         create("flytech") {
             dimension = "target"
             applicationIdSuffix = ".flytech"
             versionNameSuffix = "-flytech"
             resValue("string", "app_name", "Switcloud L2 Demo Flytech")
+            missingDimensionStrategy("l2", "mokastd")
         }
         create("newland") {
             dimension = "target"
             applicationIdSuffix = ".newland"
             versionNameSuffix = "-newland"
             resValue("string", "app_name", "Switcloud L2 Demo Newland")
+            missingDimensionStrategy("l2", "mokastd")
         }
         create("authsignal") {
             dimension = "target"
             applicationIdSuffix = ".authsignal"
             versionNameSuffix = "-authsignal"
             resValue("string", "app_name", "Switcloud L2 Demo Authsignal")
+            missingDimensionStrategy("l2", "mokastd")
+        }
+        create("generic") {
+            dimension = "target"
+            resValue("string", "app_name", "Switcloud L2 Demo")
+            missingDimensionStrategy("l2", "mokastd")
         }
         create("standalone") {
             dimension = "mode"
@@ -89,8 +99,11 @@ android {
         create("connected") {
             dimension = "mode"
         }
-        create("mokastd") {
-            dimension = "l2"
+        create("showNfc") {
+            dimension = "nfcLogo"
+        }
+        create("hideNfc") {
+            dimension = "nfcLogo"
         }
     }
 
@@ -98,13 +111,17 @@ android {
         beforeVariants { variantBuilder ->
             val mode = variantBuilder.productFlavors.find { it.first == "mode" }?.second
             val target = variantBuilder.productFlavors.find { it.first == "target" }?.second
+            val nfcLogo = variantBuilder.productFlavors.find { it.first == "nfcLogo" }?.second
 
             val isConnectedFlytech = (mode == "connected" && target == "flytech")
             val isConnectedSunmi = (mode == "connected" && target == "sunmi")
             val isConnectedNewland = (mode == "connected" && target == "newland")
             val isConnectedAuthsignal = (mode == "connected" && target == "authsignal")
+            val isConnectedGeneric = (mode == "connected" && target == "generic")
 
-            if (isConnectedFlytech || isConnectedSunmi || isConnectedNewland || isConnectedAuthsignal) {
+            val isHideNfcAndNotGeneric = (nfcLogo == "hideNfc" && target != "generic" )
+
+            if (isConnectedFlytech || isConnectedSunmi || isConnectedNewland || isConnectedAuthsignal || isConnectedGeneric || isHideNfcAndNotGeneric) {
                 variantBuilder.enable = false
             }
         }

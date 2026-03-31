@@ -11,4 +11,7 @@ object FlavorUtils {
 
     fun getFlavorMode(): FlavorModeEnum =
         FlavorModeEnum.valueOf(BuildConfig.FLAVOR_mode.uppercase(getDefault()))
+
+    fun isHideNfcLogoFlavor(): Boolean =
+        BuildConfig.FLAVOR_nfcLogo == "hideNfc"
 }

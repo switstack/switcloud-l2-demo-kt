@@ -47,6 +47,7 @@ import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.AmountUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.isHideNfcLogoFlavor
 import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallSquareScreen
 import kotlinx.coroutines.delay
 
@@ -65,7 +66,7 @@ fun PaymentScreen(
 
     val secondaryDisplayManager = LocalSecondaryDisplayManager.current
 
-    val shouldDisplayNfcLogo = FlavorTargetEnum.entries.contains(getFlavorTarget())
+    val shouldDisplayNfcLogo = !isHideNfcLogoFlavor() && FlavorTargetEnum.entries.contains(getFlavorTarget())
 
     val shouldDisplayNfcOnPrimaryScreen = shouldDisplayNfcLogo && secondaryDisplayManager?.secondaryDisplayExists() == false
 
