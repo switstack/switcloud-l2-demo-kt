@@ -36,38 +36,42 @@ fun Footer(modifier: Modifier = Modifier) {
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Image(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 5.dp, end = 10.dp),
-            painter = painterResource(
-                id = when (getFlavorTarget()) {
-                    FlavorTargetEnum.QUALCOMM -> R.drawable.ic_dragonwing
-                    FlavorTargetEnum.SUNMI -> R.drawable.ic_sunmi
-                    FlavorTargetEnum.FLYTECH -> R.drawable.ic_flytech
-                    FlavorTargetEnum.NEWLAND -> R.drawable.ic_newland
-                    FlavorTargetEnum.AUTHSIGNAL -> R.drawable.ic_authsignal
-                }
-            ),
-            contentDescription = "Brand Logo",
-            alignment = Alignment.Center,
-            contentScale = if (isLandscape) ContentScale.FillHeight else ContentScale.FillWidth,
-            colorFilter = if (isSystemInDarkTheme()) {
-                // using contrasted color with background
-                ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
-            } else {
-                // using default color on brand logos
-                ColorFilter.tint(
-                    when (getFlavorTarget()) {
-                        FlavorTargetEnum.QUALCOMM -> Color(0xFF31017D)
-                        FlavorTargetEnum.SUNMI -> Color(0xFFFF6801)
-                        FlavorTargetEnum.FLYTECH -> Color(0xFF0081C6)
-                        FlavorTargetEnum.NEWLAND -> Color(0xFF164A85)
-                        FlavorTargetEnum.AUTHSIGNAL -> Color(0xFF000000)
+        if (getFlavorTarget() != FlavorTargetEnum.GENERIC) {
+            Image(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 5.dp, end = 10.dp),
+                painter = painterResource(
+                    id = when (getFlavorTarget()) {
+                        FlavorTargetEnum.QUALCOMM -> R.drawable.ic_dragonwing
+                        FlavorTargetEnum.SUNMI -> R.drawable.ic_sunmi
+                        FlavorTargetEnum.FLYTECH -> R.drawable.ic_flytech
+                        FlavorTargetEnum.NEWLAND -> R.drawable.ic_newland
+                        FlavorTargetEnum.AUTHSIGNAL -> R.drawable.ic_authsignal
+                        FlavorTargetEnum.GENERIC -> -1 // unused in this case
                     }
-                )
-            }
-        )
+                ),
+                contentDescription = "Brand Logo",
+                alignment = Alignment.Center,
+                contentScale = if (isLandscape) ContentScale.FillHeight else ContentScale.FillWidth,
+                colorFilter = if (isSystemInDarkTheme()) {
+                    // using contrasted color with background
+                    ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
+                } else {
+                    // using default color on brand logos
+                    ColorFilter.tint(
+                        when (getFlavorTarget()) {
+                            FlavorTargetEnum.QUALCOMM -> Color(0xFF31017D)
+                            FlavorTargetEnum.SUNMI -> Color(0xFFFF6801)
+                            FlavorTargetEnum.FLYTECH -> Color(0xFF0081C6)
+                            FlavorTargetEnum.NEWLAND -> Color(0xFF164A85)
+                            FlavorTargetEnum.AUTHSIGNAL -> Color(0xFF000000)
+                            FlavorTargetEnum.GENERIC -> Color.Transparent // unused in this case
+                        }
+                    )
+                }
+            )
+        }
 
         Image(
             modifier = Modifier
