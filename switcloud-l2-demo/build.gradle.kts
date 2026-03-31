@@ -10,6 +10,13 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 
+val appVersionName = "1.1.0"
+
+fun generateVersionCode(versionName: String): Int {
+    val (major, minor, patch) = versionName.split('.').map { it.toInt() }
+    return major * 1_000_000 + minor * 1_000 + patch
+}
+
 android {
     namespace = "io.switstack.switcloud.switcloud_l2_demo"
     compileSdk = 36
@@ -18,8 +25,8 @@ android {
         applicationId = "io.switstack.switcloud.switcloud_l2_demo"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionName = appVersionName
+        versionCode = generateVersionCode(appVersionName)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -126,6 +133,9 @@ android {
             }
         }
     }
+
+    val fileName = "${rootProject.name}-$appVersionName"
+    setProperty("archivesBaseName", fileName)
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
