@@ -1,4 +1,5 @@
 import io.gitlab.arturbosch.detekt.Detekt
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -9,6 +10,13 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 
+val appVersionName = "1.1.0"
+
+fun generateVersionCode(versionName: String): Int {
+    val (major, minor, patch) = versionName.split('.').map { it.toInt() }
+    return major * 1_000_000 + minor * 1_000 + patch
+}
+
 android {
     namespace = "io.switstack.switcloud.switcloud_l2_demo"
     compileSdk = 36
@@ -17,8 +25,8 @@ android {
         applicationId = "io.switstack.switcloud.switcloud_l2_demo"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionName = appVersionName
+        versionCode = generateVersionCode(appVersionName)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -49,7 +57,7 @@ android {
 
     flavorDimensions += "mode"
     flavorDimensions += "target"
-    flavorDimensions += "l2"
+    flavorDimensions += "nfcLogo"
 
     productFlavors {
         create("qualcomm") {
@@ -57,24 +65,40 @@ android {
             applicationIdSuffix = ".qcom"
             versionNameSuffix = "-qcom"
             resValue("string", "app_name", "Switcloud L2 Demo Qualcomm")
+            missingDimensionStrategy("l2", "mokastd")
         }
         create("sunmi") {
             dimension = "target"
             applicationIdSuffix = ".sunmi"
             versionNameSuffix = "-sunmi"
             resValue("string", "app_name", "Switcloud L2 Demo Sunmi")
+            missingDimensionStrategy("l2", "mokastd")
         }
         create("flytech") {
             dimension = "target"
             applicationIdSuffix = ".flytech"
             versionNameSuffix = "-flytech"
             resValue("string", "app_name", "Switcloud L2 Demo Flytech")
+            missingDimensionStrategy("l2", "mokastd")
         }
         create("newland") {
             dimension = "target"
             applicationIdSuffix = ".newland"
             versionNameSuffix = "-newland"
             resValue("string", "app_name", "Switcloud L2 Demo Newland")
+            missingDimensionStrategy("l2", "mokastd")
+        }
+        create("authsignal") {
+            dimension = "target"
+            applicationIdSuffix = ".authsignal"
+            versionNameSuffix = "-authsignal"
+            resValue("string", "app_name", "Switcloud L2 Demo Authsignal")
+            missingDimensionStrategy("l2", "mokastd")
+        }
+        create("generic") {
+            dimension = "target"
+            resValue("string", "app_name", "Switcloud L2 Demo")
+            missingDimensionStrategy("l2", "mokastd")
         }
         create("standalone") {
             dimension = "mode"
@@ -82,8 +106,11 @@ android {
         create("connected") {
             dimension = "mode"
         }
-        create("mokastd") {
-            dimension = "l2"
+        create("showNfc") {
+            dimension = "nfcLogo"
+        }
+        create("hideNfc") {
+            dimension = "nfcLogo"
         }
     }
 
@@ -91,40 +118,51 @@ android {
         beforeVariants { variantBuilder ->
             val mode = variantBuilder.productFlavors.find { it.first == "mode" }?.second
             val target = variantBuilder.productFlavors.find { it.first == "target" }?.second
+            val nfcLogo = variantBuilder.productFlavors.find { it.first == "nfcLogo" }?.second
 
             val isConnectedFlytech = (mode == "connected" && target == "flytech")
             val isConnectedSunmi = (mode == "connected" && target == "sunmi")
             val isConnectedNewland = (mode == "connected" && target == "newland")
+            val isConnectedAuthsignal = (mode == "connected" && target == "authsignal")
+            val isConnectedGeneric = (mode == "connected" && target == "generic")
 
-            if (isConnectedFlytech || isConnectedSunmi || isConnectedNewland) {
+            val isHideNfcAndNotGeneric = (nfcLogo == "hideNfc" && target != "generic" )
+
+            if (isConnectedFlytech || isConnectedSunmi || isConnectedNewland || isConnectedAuthsignal || isConnectedGeneric || isHideNfcAndNotGeneric) {
                 variantBuilder.enable = false
             }
         }
     }
 
+    val fileName = "${rootProject.name}-$appVersionName"
+    setProperty("archivesBaseName", fileName)
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-        jvmTarget = "21"
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 
 dependencies {
 
-    implementation("androidx.core:core-ktx:1.17.0")
+    implementation("androidx.core:core-ktx:1.18.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.google.android.material:material:1.13.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
-    implementation("androidx.fragment:fragment-ktx:1.5.6")
-    implementation("androidx.activity:activity-compose:1.8.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+    implementation("androidx.fragment:fragment-ktx:1.8.9")
+    implementation("androidx.activity:activity-compose:1.13.0")
 
     // Compose
-    implementation(platform("androidx.compose:compose-bom:2025.11.01"))
+    implementation(platform("androidx.compose:compose-bom:2026.03.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.material3:material3")
@@ -134,7 +172,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.9.6")
+    implementation("androidx.navigation:navigation-compose:2.9.7")
 
     /* TLV parser / builder */
     implementation("com.payneteasy:ber-tlv:1.0-11")
@@ -149,7 +187,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
 
     /* Switstack's deps */
-    implementation("io.switstack.switcloud:switcloud-l2-kt:1.1.0")
+    implementation("io.switstack.switcloud:switcloud-l2-kt:1.2.0")
     implementation("io.switstack.switcloud:switcloud-api-kt:2.28.0")
 }
 

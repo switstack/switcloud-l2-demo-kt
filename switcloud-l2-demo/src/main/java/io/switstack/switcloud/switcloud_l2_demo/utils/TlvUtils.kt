@@ -6,12 +6,12 @@ import com.payneteasy.tlv.BerTlvParser
 import com.payneteasy.tlv.HexUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import io.switstack.switcloud.switcloud_l2_demo.SwitcloudL2DemoException
 import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
 import io.switstack.switcloud.switcloudapi.model.CAPKCreateSchema
 import io.switstack.switcloud.switcloudapi.model.EMVCreateSchema
 import io.switstack.switcloud.switcloudapi.model.EMVTransactionType
 import okio.IOException
+import org.openapitools.client.infrastructure.LocalDateAdapter
 import org.openapitools.client.infrastructure.UUIDAdapter
 
 object TlvUtils {
@@ -20,6 +20,7 @@ object TlvUtils {
         Moshi.Builder()
             .add(UUIDAdapter())
             .add(KotlinJsonAdapterFactory())
+            .add(LocalDateAdapter())
             .build()
     }
 
@@ -199,5 +200,17 @@ object TlvUtils {
         builder.addHex(BerTag(0xDF, 0xA0, 0x23), cakey)
 
         return builder.buildArray()
+    }
+}
+
+class SwitcloudL2DemoException : RuntimeException {
+
+    constructor() : super()
+    constructor(message: String) : super(message)
+    constructor(message: String, cause: Throwable) : super(message, cause)
+    constructor(cause: Throwable) : super(cause)
+
+    fun makeMessage(message: String, cause: Throwable): String {
+        return "$message: ${cause.message}"
     }
 }

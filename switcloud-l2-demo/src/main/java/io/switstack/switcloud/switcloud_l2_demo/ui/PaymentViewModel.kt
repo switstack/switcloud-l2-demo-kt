@@ -9,6 +9,7 @@ import io.switstack.switcloud.switcloud_l2_demo.data.CapkMultiScheme
 import io.switstack.switcloud.switcloud_l2_demo.data.EmvMultiScheme
 import io.switstack.switcloud.switcloud_l2_demo.data.EmvTagEnum
 import io.switstack.switcloud.switcloud_l2_demo.data.OPSVerdictEnum
+import io.switstack.switcloud.switcloud_l2_demo.extensions.readJsonFromAssets
 import io.switstack.switcloud.switcloud_l2_demo.utils.ByteArrayHexStringUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvConfig
 import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getErrorIndication
@@ -17,7 +18,6 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getOPSVerdict
 import io.switstack.switcloud.switcloud_l2_demo.utils.MokaConfig
 import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
-import io.switstack.switcloud.switcloud_l2_demo.utils.readJsonFromAssets
 import io.switstack.switcloud.switcloudapi.model.CAPKCreateSchema
 import io.switstack.switcloud.switcloudapi.model.EMVCreateSchema
 import io.switstack.switcloud.switcloudl2.IGlase

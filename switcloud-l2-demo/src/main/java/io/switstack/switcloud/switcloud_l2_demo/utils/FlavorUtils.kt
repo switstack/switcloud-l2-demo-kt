@@ -1,6 +1,8 @@
 package io.switstack.switcloud.switcloud_l2_demo.utils
 
 import io.switstack.switcloud.switcloud_l2_demo.BuildConfig
+import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorModeEnum
+import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorTargetEnum
 import java.util.Locale.getDefault
 
 object FlavorUtils {
@@ -9,4 +11,7 @@ object FlavorUtils {
 
     fun getFlavorMode(): FlavorModeEnum =
         FlavorModeEnum.valueOf(BuildConfig.FLAVOR_mode.uppercase(getDefault()))
+
+    fun isHideNfcLogoFlavor(): Boolean =
+        BuildConfig.FLAVOR_nfcLogo == "hideNfc"
 }

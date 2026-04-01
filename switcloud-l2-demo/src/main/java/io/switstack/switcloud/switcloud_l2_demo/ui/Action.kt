@@ -1,4 +1,4 @@
-package io.switstack.switcloud.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.RowScope
@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.switstack.switcloud.switcloud_l2_demo.ui.ButtonType
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 
 @Composable

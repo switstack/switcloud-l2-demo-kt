@@ -1,4 +1,4 @@
-package io.switstack.switcloud.switcloud_l2_demo
+package io.switstack.switcloud.switcloud_l2_demo.ui
 
 import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
@@ -40,17 +40,14 @@ import androidx.compose.ui.tooling.preview.Devices.TABLET
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.switstack.switcloud.switcloud_l2_demo.R
 import io.switstack.switcloud.switcloud_l2_demo.secondary_display.LocalSecondaryDisplayManager
-import io.switstack.switcloud.switcloud_l2_demo.ui.ButtonType
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayConfig
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues
 import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentDisplayedStateValues.ImageConfig
-import io.switstack.switcloud.switcloud_l2_demo.ui.PaymentViewModel
-import io.switstack.switcloud.switcloud_l2_demo.ui.TabletPhonePreviews
+import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.AmountUtils
-import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
+import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.isHideNfcLogoFlavor
 import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallSquareScreen
 import kotlinx.coroutines.delay
 
@@ -69,7 +66,7 @@ fun PaymentScreen(
 
     val secondaryDisplayManager = LocalSecondaryDisplayManager.current
 
-    val shouldDisplayNfcLogo = FlavorTargetEnum.entries.contains(getFlavorTarget())
+    val shouldDisplayNfcLogo = !isHideNfcLogoFlavor() && FlavorTargetEnum.entries.contains(getFlavorTarget())
 
     val shouldDisplayNfcOnPrimaryScreen = shouldDisplayNfcLogo && secondaryDisplayManager?.secondaryDisplayExists() == false
 
