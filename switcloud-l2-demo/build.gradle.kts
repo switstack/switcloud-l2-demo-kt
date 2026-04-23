@@ -10,7 +10,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
 }
 
-val appVersionName = "1.1.0"
+val appVersionName = "1.1.1"
 
 fun generateVersionCode(versionName: String): Int {
     val (major, minor, patch) = versionName.split('.').map { it.toInt() }
