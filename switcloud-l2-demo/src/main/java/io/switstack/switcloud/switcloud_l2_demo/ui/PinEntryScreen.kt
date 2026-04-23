@@ -149,6 +149,7 @@ fun PinEntryScreenContent(
                 Text(
                     text = stringResource(R.string.enter_your_pin),
                     style = config.headerTextStyle,
+                    maxLines = 1,
                     autoSize = TextAutoSize.StepBased(maxFontSize = config.headerTextStyle.fontSize),
                     color = MaterialTheme.colorScheme.onPrimary
                 )
@@ -194,6 +195,7 @@ fun PinEntryScreenContent(
                                     content = {
                                         Text(
                                             "Cancel",
+                                            maxLines = 1,
                                             autoSize = TextAutoSize.StepBased(maxFontSize = 22.sp),
                                             style = MaterialTheme.typography.titleLarge
                                         )

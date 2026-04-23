@@ -51,6 +51,7 @@ import io.switstack.switcloud.switcloud_l2_demo.ui.enums.FlavorTargetEnum
 import io.switstack.switcloud.switcloud_l2_demo.ui.theme.Switcloudl2demoktTheme
 import io.switstack.switcloud.switcloud_l2_demo.utils.FlavorUtils.getFlavorTarget
 import io.switstack.switcloud.switcloud_l2_demo.utils.isCompactDevice
+import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallHeightScreen
 import io.switstack.switcloud.switcloud_l2_demo.utils.isSmallSquareScreen
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -60,10 +61,11 @@ fun AmountEntryScreen(onProceedPaymentClick: (total: String) -> Unit) {
     val keyboardVisible = WindowInsets.isImeVisible
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val isSmallSquareScreen = isSmallSquareScreen()
+    val isSmallHeightScreen = isSmallHeightScreen()
     val secondaryDisplayManager = LocalSecondaryDisplayManager.current
 
     val config = when {
-        isSmallSquareScreen -> PaymentDisplayConfig(
+        isSmallSquareScreen || isSmallHeightScreen -> PaymentDisplayConfig(
             R.drawable.bg_payment_land,
             0.15f,
             MaterialTheme.typography.displayLarge
