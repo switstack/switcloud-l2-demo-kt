@@ -6,5 +6,5 @@ plugins {
 
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0" apply true
     id("io.gitlab.arturbosch.detekt") version "1.23.8" apply true
-    id("org.jetbrains.dokka") version "1.9.10" apply false
+    id("org.jetbrains.dokka") version "1.9.20" apply false
 }
