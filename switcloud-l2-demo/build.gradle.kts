@@ -188,7 +188,7 @@ dependencies {
 
     /* Switstack's deps */
     implementation("io.switstack.switcloud:switcloud-l2-kt:1.2.0")
-    implementation("io.switstack.switcloud:switcloud-api-kt:2.28.0")
+    implementation("io.switstack.switcloud:switcloud-api-kt:2.28.5")
 }
 
 /* Detekt --------------------------------------------------------------------------------------- */
