@@ -18,6 +18,7 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getOPSVerdict
 import io.switstack.switcloud.switcloud_l2_demo.utils.MokaConfig
 import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
+import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils.parseJsonToScheme
 import io.switstack.switcloud.switcloudapi.model.CAPKCreateSchema
 import io.switstack.switcloud.switcloudapi.model.EMVCreateSchema
 import io.switstack.switcloud.switcloudl2.IGlase
@@ -29,7 +30,7 @@ import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2InterruptedExcept
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2NoSelectedCombinationException
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2NotFoundException
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2TimeoutException
-import io.switstack.switcloud.switcloudl2.helpers.CardInterfaceType
+import io.switstack.switcloud.switcloudl2.helpers.CardInterfaceOrErrorType
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -65,7 +66,7 @@ class PaymentViewModel() : ViewModel() {
     }
 
     fun setupSwitcloudL2(activity: Activity) {
-        switcloudL2.setActivity(activity)
+        switcloudL2.setActivity(activity, true)
 
         // Update the UI state to signal that initialization is complete.
         _uiState.update { it.copy(initialized = true) }
@@ -106,14 +107,11 @@ class PaymentViewModel() : ViewModel() {
         try {
             val jsonString = context.readJsonFromAssets("emv-config/conf-multiScheme.json")
 
-            val emvMultiSchemeData = TlvUtils.parseJsonToScheme(jsonString, EmvMultiScheme::class.java)
+            val emvMultiSchemeData = parseJsonToScheme<EmvMultiScheme>(jsonString)
 
-            // You can now use the parsed data
-            if (emvMultiSchemeData != null) {
-                println("Successfully parsed emv config: ${emvMultiSchemeData.emvs.size} emvs found!")
-            }
+            println("Successfully parsed emv config: ${emvMultiSchemeData.emvs.size} emvs found!")
 
-            return emvMultiSchemeData?.emvs?.values?.toList()
+            return emvMultiSchemeData.emvs.values.toList()
         } catch (e: Exception) {
             _uiState.update {
                 it.copy(errorMessageResource = R.string.error_loading_emv_config)
@@ -126,13 +124,11 @@ class PaymentViewModel() : ViewModel() {
         try {
             val jsonString = context.readJsonFromAssets("emv-config/multiSchemeKeys.json")
 
-            val capkMultiSchemeData = TlvUtils.parseJsonToScheme(jsonString, CapkMultiScheme::class.java)
+            val capkMultiSchemeData = parseJsonToScheme<CapkMultiScheme>(jsonString)
 
-            if (capkMultiSchemeData != null) {
-                println("Successfully parsed capk: ${capkMultiSchemeData.capks.size} capks found!")
-            }
+            println("Successfully parsed capk: ${capkMultiSchemeData.capks.size} capks found!")
 
-            return capkMultiSchemeData?.capks?.values?.toList()
+            return capkMultiSchemeData.capks.values.toList()
         } catch (e: Exception) {
             _uiState.update {
                 it.copy(errorMessageResource = R.string.error_loading_capks)
@@ -171,7 +167,7 @@ class PaymentViewModel() : ViewModel() {
                 }
 
                 val card = glase.protocolActivation(null)
-                if (card != CardInterfaceType.CARD_INTERFACE_TYPE_CONTACTLESS) {
+                if (card != CardInterfaceOrErrorType.CARD_INTERFACE_OR_ERROR_TYPE_CONTACTLESS) {
                     _uiState.update {
                         it.copy(errorMessageResource = R.string.error_card_detection)
                     }
