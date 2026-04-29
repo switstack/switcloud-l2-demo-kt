@@ -1,11 +1,9 @@
 package io.switstack.switcloud.switcloud_l2_demo.data
 
-import com.squareup.moshi.Json
 import io.switstack.switcloud.switcloudapi.model.EMVCreateSchema
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class EmvMultiScheme(
-
-    @field:Json(name = "emvs")
     val emvs: Map<String, EMVCreateSchema>
-
 )

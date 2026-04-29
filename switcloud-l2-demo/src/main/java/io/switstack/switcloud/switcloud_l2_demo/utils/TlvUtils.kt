@@ -4,24 +4,19 @@ import com.payneteasy.tlv.BerTag
 import com.payneteasy.tlv.BerTlvBuilder
 import com.payneteasy.tlv.BerTlvParser
 import com.payneteasy.tlv.HexUtil
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.switstack.switcloud.switcloud_l2_demo.data.TlvEntry
 import io.switstack.switcloud.switcloudapi.model.CAPKCreateSchema
 import io.switstack.switcloud.switcloudapi.model.EMVCreateSchema
 import io.switstack.switcloud.switcloudapi.model.EMVTransactionType
-import okio.IOException
-import org.openapitools.client.infrastructure.LocalDateAdapter
-import org.openapitools.client.infrastructure.UUIDAdapter
+import kotlinx.serialization.json.Json
 
 object TlvUtils {
 
-    val moshi by lazy {
-        Moshi.Builder()
-            .add(UUIDAdapter())
-            .add(KotlinJsonAdapterFactory())
-            .add(LocalDateAdapter())
-            .build()
+    val json = Json {
+        prettyPrint = false
+        ignoreUnknownKeys = true
+        isLenient = true
+        coerceInputValues = true
     }
 
     fun parseTlvString(tlvString: String?): List<TlvEntry> {
@@ -87,14 +82,7 @@ object TlvUtils {
         return builder.buildArray()
     }
 
-    fun <T> parseJsonToScheme(jsonString: String, modelClass: Class<T>): T? {
-        try {
-            val adapter = moshi.adapter(modelClass)
-            return adapter.fromJson(jsonString)
-        } catch (e: IOException) {
-            throw SwitcloudL2DemoException(e)
-        }
-    }
+    inline fun <reified T> parseJsonToScheme(jsonString: String): T = json.decodeFromString<T>(jsonString)
 
     fun makeGlaseCombination(emv: EMVCreateSchema): ByteArray {
         val e1Data = BerTlvBuilder()
