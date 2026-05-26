@@ -225,7 +225,12 @@ class PaymentViewModel() : ViewModel() {
                 // Managing OPS status and Error indication when declined status
                 if (!success && !pinEntryRequired) {
                     var errorMessage = ""
-                    val opsStatusAndErrorIndicationTags = listOf(EmvTagEnum.TAG_DF8129, EmvTagEnum.TAG_9F8210, EmvTagEnum.TAG_DF8115)
+                    val opsStatusAndErrorIndicationTags = listOf(
+                        EmvTagEnum.TAG_DF8129, // OPS
+                        EmvTagEnum.TAG_9F8210, // OPS
+                        EmvTagEnum.TAG_DF8115, // EI
+                        EmvTagEnum.TAG_9F8204 // EI
+                    )
 
                     for (tag in opsStatusAndErrorIndicationTags) {
                         try {
@@ -238,7 +243,8 @@ class PaymentViewModel() : ViewModel() {
                                         getOPSStatus(tlvEntry.value)?.let { errorMessage += it }
                                     }
 
-                                    EmvTagEnum.TAG_DF8115 -> {
+                                    EmvTagEnum.TAG_DF8115,
+                                    EmvTagEnum.TAG_9F8204 -> {
                                         getErrorIndication(tlvEntry.value)?.let {
                                             errorMessage += " ($it)"
                                         }
