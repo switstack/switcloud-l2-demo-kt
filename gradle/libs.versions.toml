@@ -17,7 +17,7 @@ tlv = "1.0-11"
 navigationCompose = "2.9.8"
 kotlinxSerialization = "1.11.0"
 switcloud-api = "2.28.5"
-switcloud-l2 = "1.6.0"
+switcloud-l2 = "2.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
