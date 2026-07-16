@@ -16,7 +16,6 @@ activity = "1.13.0"
 tlv = "1.0-11"
 navigationCompose = "2.9.8"
 kotlinxSerialization = "1.11.0"
-switcloud-api = "2.28.6"
 switcloud-l2 = "1.7.0"
 
 [libraries]
@@ -66,7 +65,6 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 tlv = { group = "com.payneteasy", name = "ber-tlv", version.ref = "tlv" }
 
 # Switcloud deps
-switcloud-api = { group = "io.switstack.switcloud", name = "switcloud-api-kt", version.ref = "switcloud-api" }
 switcloud-l2 = { group = "io.switstack.switcloud", name = "switcloud-l2-kt", version.ref = "switcloud-l2" }
 
 [bundles]

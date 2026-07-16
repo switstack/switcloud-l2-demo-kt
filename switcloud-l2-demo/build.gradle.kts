@@ -173,7 +173,6 @@ dependencies {
 
     /* Switstack's deps */
     implementation(libs.switcloud.l2)
-    implementation(libs.switcloud.api)
 }
 
 /* Detekt --------------------------------------------------------------------------------------- */
