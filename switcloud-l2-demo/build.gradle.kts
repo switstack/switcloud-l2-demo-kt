@@ -17,7 +17,7 @@ fun generateVersionCode(versionName: String): Int {
 
 android {
     namespace = "io.switstack.switcloud.switcloud_l2_demo"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "io.switstack.switcloud.switcloud_l2_demo"
