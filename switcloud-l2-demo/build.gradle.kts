@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.detekt)
 }
 
-val appVersionName = "1.1.1"
+val appVersionName = "1.2.0"
 
 fun generateVersionCode(versionName: String): Int {
     val (major, minor, patch) = versionName.split('.').map { it.toInt() }
