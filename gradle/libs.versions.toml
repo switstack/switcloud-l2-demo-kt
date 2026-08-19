@@ -16,7 +16,7 @@ activity = "1.13.0"
 tlv = "1.0-11"
 navigationCompose = "2.9.8"
 kotlinxSerialization = "1.11.0"
-switcloud-l2 = "1.7.0"
+switcloud-l2 = "2.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -66,6 +66,7 @@ tlv = { group = "com.payneteasy", name = "ber-tlv", version.ref = "tlv" }
 
 # Switcloud deps
 switcloud-l2 = { group = "io.switstack.switcloud", name = "switcloud-l2-kt", version.ref = "switcloud-l2" }
+switcloud-l2-domain = { group = "io.switstack.switcloud", name = "switcloud-l2-domain-kt", version.ref = "switcloud-l2" }
 
 [bundles]
 # Optional: Group common Compose libraries into a bundle for convenience

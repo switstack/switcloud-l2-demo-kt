@@ -21,7 +21,7 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils.parseJsonToScheme
 import io.switstack.switcloud.switcloudapi.model.CAPKCreateSchema
 import io.switstack.switcloud.switcloudapi.model.EMVCreateSchema
-import io.switstack.switcloud.switcloudl2.IGlase
+import io.switstack.switcloud.switcloudl2.IGla
 import io.switstack.switcloud.switcloudl2.IReader
 import io.switstack.switcloud.switcloudl2.SwitcloudL2
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2EmptyCandidateListException
@@ -44,7 +44,7 @@ import java.util.Locale
 class PaymentViewModel() : ViewModel() {
 
     private val switcloudL2: SwitcloudL2 = SwitcloudL2.getInstance()
-    private lateinit var glase: IGlase
+    private lateinit var glase: IGla
     private lateinit var reader: IReader
     private val _uiState = MutableStateFlow(PaymentUiState())
     val uiState: StateFlow<PaymentUiState> = _uiState.asStateFlow()
@@ -52,7 +52,7 @@ class PaymentViewModel() : ViewModel() {
     init {
         try {
             // Setting reference to switcloud components
-            glase = switcloudL2.glase()
+            glase = switcloudL2.gla()
             reader = switcloudL2.reader()
         } catch (e: Exception) {
             println("Initialization failed: ${e.message}")
