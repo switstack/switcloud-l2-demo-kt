@@ -2,15 +2,13 @@ import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
-
-    /* Detekt */
-    id("io.gitlab.arturbosch.detekt")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.detekt)
 }
 
-val appVersionName = "1.1.1"
+val appVersionName = "1.2.0"
 
 fun generateVersionCode(versionName: String): Int {
     val (major, minor, patch) = versionName.split('.').map { it.toInt() }
@@ -19,7 +17,7 @@ fun generateVersionCode(versionName: String): Int {
 
 android {
     namespace = "io.switstack.switcloud.switcloud_l2_demo"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "io.switstack.switcloud.switcloud_l2_demo"
@@ -39,6 +37,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
 
         debug {
@@ -49,6 +48,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        resValues = true
     }
 
     androidResources {
@@ -114,32 +114,29 @@ android {
         }
     }
 
-    androidComponents {
-        beforeVariants { variantBuilder ->
-            val mode = variantBuilder.productFlavors.find { it.first == "mode" }?.second
-            val target = variantBuilder.productFlavors.find { it.first == "target" }?.second
-            val nfcLogo = variantBuilder.productFlavors.find { it.first == "nfcLogo" }?.second
-
-            val isConnectedFlytech = (mode == "connected" && target == "flytech")
-            val isConnectedSunmi = (mode == "connected" && target == "sunmi")
-            val isConnectedNewland = (mode == "connected" && target == "newland")
-            val isConnectedAuthsignal = (mode == "connected" && target == "authsignal")
-            val isConnectedGeneric = (mode == "connected" && target == "generic")
-
-            val isHideNfcAndNotGeneric = (nfcLogo == "hideNfc" && target != "generic" )
-
-            if (isConnectedFlytech || isConnectedSunmi || isConnectedNewland || isConnectedAuthsignal || isConnectedGeneric || isHideNfcAndNotGeneric) {
-                variantBuilder.enable = false
-            }
-        }
-    }
-
-    val fileName = "${rootProject.name}-$appVersionName"
-    setProperty("archivesBaseName", fileName)
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
+    }
+}
+
+androidComponents {
+    beforeVariants { variantBuilder ->
+        val mode = variantBuilder.productFlavors.find { it.first == "mode" }?.second
+        val target = variantBuilder.productFlavors.find { it.first == "target" }?.second
+        val nfcLogo = variantBuilder.productFlavors.find { it.first == "nfcLogo" }?.second
+
+        val isConnectedFlytech = (mode == "connected" && target == "flytech")
+        val isConnectedSunmi = (mode == "connected" && target == "sunmi")
+        val isConnectedNewland = (mode == "connected" && target == "newland")
+        val isConnectedAuthsignal = (mode == "connected" && target == "authsignal")
+        val isConnectedGeneric = (mode == "connected" && target == "generic")
+
+        val isHideNfcAndNotGeneric = (nfcLogo == "hideNfc" && target != "generic" )
+
+        if (isConnectedFlytech || isConnectedSunmi || isConnectedNewland || isConnectedAuthsignal || isConnectedGeneric || isHideNfcAndNotGeneric) {
+            variantBuilder.enable = false
+        }
     }
 }
 
@@ -149,46 +146,34 @@ kotlin {
     }
 }
 
-dependencies {
+base {
+    archivesName.set("${rootProject.name}-$appVersionName")
+}
 
-    implementation("androidx.core:core-ktx:1.18.0")
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("com.google.android.material:material:1.13.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.10.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
-    implementation("androidx.fragment:fragment-ktx:1.8.9")
-    implementation("androidx.activity:activity-compose:1.13.0")
+dependencies {
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
 
     // Compose
-    implementation(platform("androidx.compose:compose-bom:2026.03.01"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.bundles.compose.core)
+    implementation(libs.androidx.activity)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-
-    // Navigation
-    implementation("androidx.navigation:navigation-compose:2.9.7")
-
-    /* TLV parser / builder */
-    implementation("com.payneteasy:ber-tlv:1.0-11")
+    // TLV parser / builder
+    implementation(libs.tlv)
 
     /* Serialization */
-    implementation("com.squareup.moshi:moshi:1.15.2")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
+    implementation(libs.kotlinx.serialization.json)
 
-    testImplementation("junit:junit:4.13.2")
-
-    androidTestImplementation("androidx.test.ext:junit:1.3.0")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
     /* Switstack's deps */
-    implementation("io.switstack.switcloud:switcloud-l2-kt:1.2.0")
-    implementation("io.switstack.switcloud:switcloud-api-kt:2.28.0")
+    implementation(libs.switcloud.l2)
+    implementation(libs.switcloud.l2.domain)
 }
 
 /* Detekt --------------------------------------------------------------------------------------- */
@@ -213,6 +198,5 @@ tasks.withType<Detekt>().configureEach {
 }
 
 dependencies {
-    detekt("io.gitlab.arturbosch.detekt:detekt-formatting:${detekt.toolVersion}")
-    detekt("io.gitlab.arturbosch.detekt:detekt-cli:${detekt.toolVersion}")
+    detektPlugins(libs.bundles.detekt)
 }

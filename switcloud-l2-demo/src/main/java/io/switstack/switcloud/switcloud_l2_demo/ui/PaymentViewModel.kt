@@ -18,9 +18,10 @@ import io.switstack.switcloud.switcloud_l2_demo.utils.EmvUtils.getOPSVerdict
 import io.switstack.switcloud.switcloud_l2_demo.utils.MokaConfig
 import io.switstack.switcloud.switcloud_l2_demo.utils.SharedPrefUtils
 import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils
+import io.switstack.switcloud.switcloud_l2_demo.utils.TlvUtils.parseJsonToScheme
 import io.switstack.switcloud.switcloudapi.model.CAPKCreateSchema
 import io.switstack.switcloud.switcloudapi.model.EMVCreateSchema
-import io.switstack.switcloud.switcloudl2.IGlase
+import io.switstack.switcloud.switcloudl2.IGla
 import io.switstack.switcloud.switcloudl2.IReader
 import io.switstack.switcloud.switcloudl2.SwitcloudL2
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2EmptyCandidateListException
@@ -29,7 +30,7 @@ import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2InterruptedExcept
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2NoSelectedCombinationException
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2NotFoundException
 import io.switstack.switcloud.switcloudl2.exception.SwitcloudL2TimeoutException
-import io.switstack.switcloud.switcloudl2.helpers.CardInterfaceType
+import io.switstack.switcloud.switcloudl2.helpers.CardInterfaceOrErrorType
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +44,7 @@ import java.util.Locale
 class PaymentViewModel() : ViewModel() {
 
     private val switcloudL2: SwitcloudL2 = SwitcloudL2.getInstance()
-    private lateinit var glase: IGlase
+    private lateinit var glase: IGla
     private lateinit var reader: IReader
     private val _uiState = MutableStateFlow(PaymentUiState())
     val uiState: StateFlow<PaymentUiState> = _uiState.asStateFlow()
@@ -51,7 +52,7 @@ class PaymentViewModel() : ViewModel() {
     init {
         try {
             // Setting reference to switcloud components
-            glase = switcloudL2.glase()
+            glase = switcloudL2.gla()
             reader = switcloudL2.reader()
         } catch (e: Exception) {
             println("Initialization failed: ${e.message}")
@@ -65,7 +66,7 @@ class PaymentViewModel() : ViewModel() {
     }
 
     fun setupSwitcloudL2(activity: Activity) {
-        switcloudL2.setActivity(activity)
+        switcloudL2.setActivity(activity, true)
 
         // Update the UI state to signal that initialization is complete.
         _uiState.update { it.copy(initialized = true) }
@@ -106,14 +107,11 @@ class PaymentViewModel() : ViewModel() {
         try {
             val jsonString = context.readJsonFromAssets("emv-config/conf-multiScheme.json")
 
-            val emvMultiSchemeData = TlvUtils.parseJsonToScheme(jsonString, EmvMultiScheme::class.java)
+            val emvMultiSchemeData = parseJsonToScheme<EmvMultiScheme>(jsonString)
 
-            // You can now use the parsed data
-            if (emvMultiSchemeData != null) {
-                println("Successfully parsed emv config: ${emvMultiSchemeData.emvs.size} emvs found!")
-            }
+            println("Successfully parsed emv config: ${emvMultiSchemeData.emvs.size} emvs found!")
 
-            return emvMultiSchemeData?.emvs?.values?.toList()
+            return emvMultiSchemeData.emvs.values.toList()
         } catch (e: Exception) {
             _uiState.update {
                 it.copy(errorMessageResource = R.string.error_loading_emv_config)
@@ -126,13 +124,11 @@ class PaymentViewModel() : ViewModel() {
         try {
             val jsonString = context.readJsonFromAssets("emv-config/multiSchemeKeys.json")
 
-            val capkMultiSchemeData = TlvUtils.parseJsonToScheme(jsonString, CapkMultiScheme::class.java)
+            val capkMultiSchemeData = parseJsonToScheme<CapkMultiScheme>(jsonString)
 
-            if (capkMultiSchemeData != null) {
-                println("Successfully parsed capk: ${capkMultiSchemeData.capks.size} capks found!")
-            }
+            println("Successfully parsed capk: ${capkMultiSchemeData.capks.size} capks found!")
 
-            return capkMultiSchemeData?.capks?.values?.toList()
+            return capkMultiSchemeData.capks.values.toList()
         } catch (e: Exception) {
             _uiState.update {
                 it.copy(errorMessageResource = R.string.error_loading_capks)
@@ -171,7 +167,7 @@ class PaymentViewModel() : ViewModel() {
                 }
 
                 val card = glase.protocolActivation(null)
-                if (card != CardInterfaceType.CARD_INTERFACE_TYPE_CONTACTLESS) {
+                if (card != CardInterfaceOrErrorType.CARD_INTERFACE_OR_ERROR_TYPE_CONTACTLESS) {
                     _uiState.update {
                         it.copy(errorMessageResource = R.string.error_card_detection)
                     }
@@ -229,7 +225,12 @@ class PaymentViewModel() : ViewModel() {
                 // Managing OPS status and Error indication when declined status
                 if (!success && !pinEntryRequired) {
                     var errorMessage = ""
-                    val opsStatusAndErrorIndicationTags = listOf(EmvTagEnum.TAG_DF8129, EmvTagEnum.TAG_9F8210, EmvTagEnum.TAG_DF8115)
+                    val opsStatusAndErrorIndicationTags = listOf(
+                        EmvTagEnum.TAG_DF8129, // OPS
+                        EmvTagEnum.TAG_9F8210, // OPS
+                        EmvTagEnum.TAG_DF8115, // EI
+                        EmvTagEnum.TAG_9F8204 // EI
+                    )
 
                     for (tag in opsStatusAndErrorIndicationTags) {
                         try {
@@ -242,7 +243,8 @@ class PaymentViewModel() : ViewModel() {
                                         getOPSStatus(tlvEntry.value)?.let { errorMessage += it }
                                     }
 
-                                    EmvTagEnum.TAG_DF8115 -> {
+                                    EmvTagEnum.TAG_DF8115,
+                                    EmvTagEnum.TAG_9F8204 -> {
                                         getErrorIndication(tlvEntry.value)?.let {
                                             errorMessage += " ($it)"
                                         }

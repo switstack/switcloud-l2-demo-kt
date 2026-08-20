@@ -323,7 +323,7 @@ naming:
     excludeClassPattern: '$^'
   EnumNaming:
     active: true
-    enumEntryPattern: '[A-Z][_a-zA-Z0-9]*'
+    enumEntryPattern: '[_A-Z][_a-zA-Z0-9]*'
   ForbiddenClassName:
     active: false
     forbiddenName: []
@@ -841,7 +841,7 @@ formatting:
     active: false
     autoCorrect: true
   EnumEntryNameCase:
-    active: true
+    active: false
     autoCorrect: true
   EnumWrapping:
     active: false
