@@ -14,7 +14,7 @@ lifecycleViewModelCompose = "2.11.0"
 detekt = "1.23.8"
 activity = "1.13.0"
 tlv = "1.0-11"
-navigationCompose = "2.9.8"
+navigationCompose = "2.10.0"
 kotlinxSerialization = "1.11.0"
 switcloud-l2 = "2.2.1"
 
