@@ -4,6 +4,8 @@ object MokaConfig {
     val readerParams = byteArrayOf(
         // Trace (on)
         0xDF.toByte(), 0xA0.toByte(), 0x18, 0x01, 0x01,
+        // Supported interfaces
+        0xDF.toByte(), 0xA0.toByte(), 0x06, 0x01, 0x04,
         // Polling timeout (30 sec)
         0xDF.toByte(), 0xA0.toByte(), 0x07, 0x01, 0x1e,
         // Timeout interfaces detection (10 sec)
